@@ -40,7 +40,7 @@ const CourseReviewModal = ({setReviewModal}) => {
     }
 
   return (
-    <div>
+    <div className='text-white'>
         <div>
             {/* Modal header */}
             <div>

@@ -33,7 +33,7 @@ const TimelineSection = () => {
     return (
         <div>
             <div className="lg:flex lg:flex-row lg:gap-12 lg:items-center flex flex-col items-center gap-5">
-                <div className="flex flex-col w-[45%] gap-5">
+                <div className="flex flex-col lg:w-[45%] gap-5">
 
                     {
                         timeline.map((item, index) => (
@@ -55,12 +55,13 @@ const TimelineSection = () => {
 
                 </div>
 
-                <div className="relative shadow-blue-200">
+                <div className="relative shadow-blue-200 w-full">
                     <img src={timelineImage} alt="time line image"
                     />
 
                     <div className="absolute bg-caribbeangreen-700 flex flex-row text-white uppercase py-5 
-                        left-[11%] translate-y-[-50%]">
+                        lg:left-[11%] lg:translate-y-[-50%]
+                        item-center ">
                     {/* 10year wala dabba */}
                         <div className="flex flex-row items-center gap-5 border-r border-caribbeangreen-25 px-7">
                             <p>10</p>

@@ -34,14 +34,14 @@ const Sidebar = () => {
     return (
         <>
             <div>
-                <div className="flex min-w-[222px] flex-col border-r[1px] border-r-richblack-700 h-[calc(100vh-3.5rem)] bg-richblack-800 py-10">
+                <div className="flex lg:min-w-[222px] lg:flex-col lg:border-r[1px] border-r-richblack-700 lg:h-[calc(100vh-3.5rem)] bg-richblack-800 lg:py-10 w-full flex-col">
 
-                    <div className="flex flex-col">
+                    <div className="flex lg:flex-col flex-col">
 
                         {
                             sidebarLinks.map((link) => {
                                 if (link.type && user?.accountType !== link.type) return null
-                                console.log("aayahai sidebarme map ke andar")
+                                
                                 return (
 
                                     <SidebarLink link={link} iconName={link.icon} key={link.id} />

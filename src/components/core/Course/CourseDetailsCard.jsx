@@ -52,7 +52,7 @@ const CourseDetailsCard = ({course,setConfirmationModal,handleBuyCourse}) => {
 
     }
   return (
-    <div className="lg:h-full lg:w-[30vw] lg:absolute right-2 top-9  flex flex-col items-center justify-center lg:bg-richblack-500 ">
+    <div className="lg:h-full lg:w-[30vw] lg:absolute right-2 top-9  flex flex-col items-center justify-center lg:bg-richblack-500">
         <img
             src={ThumbnailImage}
             alt="Thumbnail Image"

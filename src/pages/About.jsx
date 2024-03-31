@@ -18,10 +18,10 @@ const About = () => {
         <div className="text-white w-11/12 max-w-maxContent mx-auto ">
             {/* section1 */}
             <section className="flex flex-col gap-5 items-center bg-richblack-700">
-                <div className="mt-[100px] text-white">
+                <div className="lg:mt-[100px] text-white ">
 
 
-                    <header className="flex flex-col items-center text-4xl bg-richblack-700">
+                    <header className="flex flex-col items-center text-4xl bg-richblack-700 justify-center text-center">
                         Driving Innovation in Online Education for a
                         <HighlightText text={"Brighter Future"} />
                         <p className="font-normal flex items-center text-richblack-200 w-[60vw] text-base">Studynotion is at the forefront of driving innovation in online education. We're passionate about creating a brighter future by offering cutting-edge courses, leveraging emerging technologies, and nurturing a vibrant learning community.</p>
@@ -29,7 +29,7 @@ const About = () => {
 
                 
 
-                    <div className="flex flex-row gap-x-3">
+                    <div className="flex lg:flex-row lg:gap-x-3 flex-col gap-y-3">
                         <img
                             src={banner1}
                             alt="banner  1"

@@ -8,15 +8,15 @@ import CTAButton from "./Button"
 const InstructorSection = () => {
     return (
         <div className='mt-[10%]'>
-            <div className=" lg:flex lg:flex-row gap-12 items-center flex flex-col">
+            <div className=" lg:flex lg:flex-row gap-12 items-center flex flex-col justify-center">
 
                 {/* leftWata dabba */}
-                <div className="w-[50%]">
+                <div className=" lg:w-[50%]">
                     <img src={Instructor} />
                 </div>
 
                 {/* right wala dabba */}
-                <div className="flex flex-col gpa-10 w-[50%] gap-8">
+                <div className="flex flex-col gpa-10 lg:w-[50%] gap-8">
                     <div className="text-4xl font-inter font-semibold
                     w-[50%]">
 

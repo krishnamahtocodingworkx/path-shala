@@ -19,7 +19,7 @@ const Course_Card = ({course,Height}) => {
                     <img
                         src={course?.thumbnail}
                         alt="CourseThumbnail"
-                        className={`${Height} w-full  rounded-xl object-cover `}
+                        className={`lg-{${Height}} w-full  rounded-xl lg:object-cover object-fit `}
                     />
                 </div>
                 <div>

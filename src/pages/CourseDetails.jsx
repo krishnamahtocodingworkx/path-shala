@@ -144,10 +144,10 @@ const CourseDetails = () => {
 
             <div className="relative flex justify-start flex-col p-8 ">
 
-            <div className="bg-richblack-800 h-[60vh] p-[100px] flex flex-col gap-y-5">
+            <div className="bg-richblack-800 lg:h-[60vh] lg:p-[100px] flex flex-col lg:gap-y-5">
             <p className="text-4xl">{courseName}</p>
                 <p className="text-richblack-300">this is course description {courseDescription}</p>
-                <div className="flex flex-row gap-x-2">
+                <div className="flex lg:flex-row lg:gap-x-2 flex-col">
                     {/* <span>{avgReviewCount}</span> */}
                     <RatingStars Review_Count={avgReviewCount} Start_Size={24} />
                     <span>{`${ratingAndReviews.length} reviews`}</span>
@@ -195,7 +195,7 @@ const CourseDetails = () => {
 
                 </div>
 
-                <div className='flex gap-x-5'>
+                <div className='flex lg:gap-x-5 lg:flex-row flex-col'>
 
                     <div>
 

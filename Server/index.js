@@ -23,9 +23,11 @@ database.dbConnect();
 //middlewares
 app.use(express.json());
 app.use(cookieParser());
+
+//deployment me hmessa origin * hoga yaad rkhna hai ye
 app.use(
     cors({
-        origin:"http://localhost:3000",
+        origin:"*",
         credentials: true,
     })
 )

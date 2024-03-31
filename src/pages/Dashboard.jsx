@@ -15,10 +15,10 @@ const Dashboard = () => {
         )
     }
     return (
-        <div className="relative flex min-h-[calc(100vh-3.5rem)] text-white">
+        <div className="lg:relative flex lg:min-h-[calc(100vh-3.5rem)] text-white flex-col lg:flex-row">
             <Sidebar />
 
-            <div className=" mx-auto w-11/12 h-[calc(100vh-3.5rem)] overflow-auto   ">
+            <div className=" mx-auto lg:w-11/12 h-[calc(100vh-3.5rem)] overflow-auto   ">
                 <Outlet />
             </div>
         </div>

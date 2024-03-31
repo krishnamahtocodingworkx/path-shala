@@ -122,11 +122,11 @@ const Home = () => {
         <div className="w-11/12 max-w-maxContent flex items-center gap-5 mx-auto justify-between flex-col">
           <div className="lg:flex lg:flex-row lg:gap-5 lg:mt-[90px] flex flex-col items-center justify-center gap-y-5">
 
-            <div className="text-4xl font-semibold w-[45%]">
+            <div className="text-4xl font-semibold lg:w-[45%]">
               Get the Skills you need for about
               <HighlightText text={"Job that is in demand"}></HighlightText>
             </div>
-            <div className="flex flex-col gap-10 w-[40%] items-start">
+            <div className="flex flex-col gap-10 lg:w-[40%] items-start">
               <p>The modern StudyNotion is the dictates its own terms. Today, to be a competitive specialist requires more than professional skills.</p>
               <CTAButton active={true} linkto={"/signup"}>
                 <div>

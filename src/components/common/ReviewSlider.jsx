@@ -31,9 +31,9 @@ const ReviewSlider = () => {
   return (
     <div className='text-white'>
 
-    <div className='h-[190px] max-w-maxContent'>
+    <div className='h-[190px] max-w-maxContent transition-all ease-linear duration-100'>
         <Swiper
-        slidesPerView={3}
+        slidesPerView={1}
         spaceBetween={24}
         // loop={true}
         freeMode={true}
@@ -41,18 +41,24 @@ const ReviewSlider = () => {
             delay:2500,
         }}
         modules={[FreeMode,Pagination,Autoplay]}
+        breakpoints={{
+            1024:{slidesPerView:3}
+          }}
+
         >
 
         {
             reviews.map((review,index)=>(
-                <SwiperSlide key={index}>
+                <SwiperSlide key={index}
+                className="border-1 ring-richblack-700 bg-richblack-700 transition-all ease-linear"
+                >
                 <img
                     src={review?.user?.image?review?.user?.image:`https://api.dicebear.com/5.x/initials/svg?seed=${review?.user?.firstName} ${review?.user?.lastName}`}
                     alt="Profil pic"
                     className="h-9 w-9 object-cover rounded-full"
                 />
 
-                <p className="w-[50px]">{review?.course?.courseName}</p>
+                <p className="lg:w-[50px]">{review?.course?.courseName}</p>
                 <p className="flex">{review?.user?.firstName} {review?.user?.lastName}</p>
 
                 <p>
