@@ -36,15 +36,15 @@ const VerifyEmail = () => {
         dispatch(signUp(accountType,firstName,lastName,email,password,confirmPassword,otp,navigate))
     }
     return (
-        <div className="text-white">
+        <div className="text-black">
 
             {
                 loading ? (
                     <div>Loading..</div>
                 ) : (
                     <div>
-                        <h1>Verify Email</h1>
-                        <p>A verification code has been sent to you Enter the code below</p>
+                        <h1 className="text-white">Verify Email</h1>
+                        <p  className="text-white">A verification code has been sent to you Enter the code below</p>
                         <form onSubmit={handleOnSubmit}>
                             <OtpInput
                                 value={otp}
@@ -53,13 +53,13 @@ const VerifyEmail = () => {
                                 renderInput={(props) => <input {...props} />}
                                 renderSeparator={<span>-</span>}
 
-                                className="text-richblack-25 bg-richblack-800"
 
                             >
 
                             </OtpInput>
                             <button
                             type="submit"
+                                 className="text-white"
                             >
                                 Verify Email
                             </button>
