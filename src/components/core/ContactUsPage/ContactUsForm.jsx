@@ -1,35 +1,35 @@
-import React, { useEffect, useState } from "react"
-import { useForm } from "react-hook-form"
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 
-import CountryCode from "../../../data/countrycode.json"
-import { apiConnector } from "../../../services/apiconnector"
-import { contactusEndpoint } from "../../../services/apis"
+import CountryCode from "../../../data/countrycode.json";
+import { apiConnector } from "../../../services/apiconnector";
+import { contactusEndpoint } from "../../../services/apis";
 
 const ContactUsForm = () => {
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors, isSubmitSuccessful },
-  } = useForm()
+  } = useForm();
 
   const submitContactForm = async (data) => {
     // console.log("Form Data - ", data)
     try {
-      setLoading(true)
+      setLoading(true);
       const res = await apiConnector(
         "POST",
         contactusEndpoint.CONTACT_US_API,
         data
-      )
+      );
       // console.log("Email Res - ", res)
-      setLoading(false)
+      setLoading(false);
     } catch (error) {
-      console.log("ERROR MESSAGE - ", error.message)
-      setLoading(false)
+      console.log("ERROR MESSAGE - ", error.message);
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     if (isSubmitSuccessful) {
@@ -39,9 +39,9 @@ const ContactUsForm = () => {
         lastname: "",
         message: "",
         phoneNo: "",
-      })
+      });
     }
-  }, [reset, isSubmitSuccessful])
+  }, [reset, isSubmitSuccessful]);
 
   return (
     <form
@@ -58,7 +58,7 @@ const ContactUsForm = () => {
             name="firstname"
             id="firstname"
             placeholder="Enter first name"
-            className="form-style"
+            className="form-style input--box"
             {...register("firstname", { required: true })}
           />
           {errors.firstname && (
@@ -76,7 +76,7 @@ const ContactUsForm = () => {
             name="lastname"
             id="lastname"
             placeholder="Enter last name"
-            className="form-style"
+            className="form-style input--box"
             {...register("lastname")}
           />
         </div>
@@ -91,7 +91,7 @@ const ContactUsForm = () => {
           name="email"
           id="email"
           placeholder="Enter email address"
-          className="form-style"
+          className="form-style input--box"
           {...register("email", { required: true })}
         />
         {errors.email && (
@@ -113,7 +113,7 @@ const ContactUsForm = () => {
               name="firstname"
               id="firstname"
               placeholder="Enter first name"
-              className="form-style"
+              className="form-style input--box"
               {...register("countrycode", { required: true })}
             >
               {CountryCode.map((ele, i) => {
@@ -121,7 +121,7 @@ const ContactUsForm = () => {
                   <option key={i} value={ele.code}>
                     {ele.code} -{ele.country}
                   </option>
-                )
+                );
               })}
             </select>
           </div>
@@ -131,7 +131,7 @@ const ContactUsForm = () => {
               name="phonenumber"
               id="phonenumber"
               placeholder="12345 67890"
-              className="form-style"
+              className="form-style input--box"
               {...register("phoneNo", {
                 required: {
                   value: true,
@@ -160,7 +160,7 @@ const ContactUsForm = () => {
           cols="30"
           rows="7"
           placeholder="Enter your message here"
-          className="form-style"
+          className="form-style input--box"
           {...register("message", { required: true })}
         />
         {errors.message && (
@@ -182,7 +182,7 @@ const ContactUsForm = () => {
         Send Message
       </button>
     </form>
-  )
-}
+  );
+};
 
-export default ContactUsForm
+export default ContactUsForm;

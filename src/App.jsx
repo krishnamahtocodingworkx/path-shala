@@ -67,7 +67,6 @@ function App() {
           }
           {
             <>
-            console.log("hii");
             user?.accoutType === ACCOUNT_TYPE.INSTRUCTOR && (
               
               

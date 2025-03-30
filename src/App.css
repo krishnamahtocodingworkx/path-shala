@@ -10,3 +10,8 @@ html,body{
 .homepage-bg{
    background: url("../src/assets/Images/bghome.svg");
 }
+
+.input--box{
+    padding: 5px;
+    border-radius: 5px;
+}

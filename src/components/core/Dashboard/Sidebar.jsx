@@ -1,98 +1,73 @@
-import React from 'react'
-
+import React from "react";
 
 import { logout } from "../../../services/operations/authAPI";
-import { useSelector, useDispatch } from 'react-redux';
-import SidebarLink from "./SidebarLink"
-import { sidebarLinks } from "../../../data/dashboard-links"
+import { useSelector, useDispatch } from "react-redux";
+import SidebarLink from "./SidebarLink";
+import { sidebarLinks } from "../../../data/dashboard-links";
 
-import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { VscSignOut } from "react-icons/vsc";
-import { NavLink } from 'react-router-dom';
-import ConfirmationModal from "../../common/ConfirmationModal"
-
-
+import { NavLink } from "react-router-dom";
+import ConfirmationModal from "../../common/ConfirmationModal";
 
 const Sidebar = () => {
+  const { user, loading: profileLoading } = useSelector(
+    (state) => state.profile
+  );
 
-    const { user, loading: profileLoading } = useSelector((state) => state.profile);
+  const { loading: authLoading } = useSelector((state) => state.auth);
 
-    const { loading: authLoading } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [confirmationModal, setConfirmationModal] = useState(null);
 
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
-    const [confirmationModal, setConfirmationModal] = useState(null);
+  if (profileLoading || authLoading) {
+    return <div className="mt-10">Loading...</div>;
+  }
+  return (
+    <div className="flex flex-col w-full lg:w-[222px] lg:h-[calc(100vh-3.5rem)] bg-richblack-800 border-r border-richblack-700 py-6">
+      {/* Sidebar Links */}
+      <div className="flex flex-col space-y-2">
+        {sidebarLinks.map((link) =>
+          link.type && user?.accountType !== link.type ? null : (
+            <SidebarLink key={link.id} link={link} iconName={link.icon} />
+          )
+        )}
+      </div>
 
-    if (profileLoading || authLoading) {
-        return (
-            <div className="mt-10">
-                Loading...
-            </div>
-        )
-    }
-    return (
-        <>
-            <div>
-                <div className="flex lg:min-w-[222px] lg:flex-col lg:border-r[1px] border-r-richblack-700 lg:h-[calc(100vh-3.5rem)] bg-richblack-800 lg:py-10 w-full flex-col">
+      {/* Divider */}
+      <div className="mx-auto my-6 h-px w-10/12 bg-richblack-600"></div>
 
-                    <div className="flex lg:flex-col flex-col">
+      {/* Settings & Logout */}
+      <div className="flex flex-col text-white space-y-2 px-4">
+        <SidebarLink
+          link={{ name: "Setting", path: "dashboard/setting" }}
+          iconName="VscSettingsGear"
+        />
 
-                        {
-                            sidebarLinks.map((link) => {
-                                if (link.type && user?.accountType !== link.type) return null
-                                
-                                return (
+        <button
+          onClick={() =>
+            setConfirmationModal({
+              text1: "Are you sure?",
+              text2: "You will be logged out of your account.",
+              btn1Text: "Log Out",
+              btn2Text: "Cancel",
+              btn1Handler: () => dispatch(logout(navigate)),
+              btn2Handler: () => setConfirmationModal(null),
+            })
+          }
+          className="text-sm font-medium text-richblack-300 flex items-center gap-x-2 hover:text-red-400 transition"
+        >
+          <VscSignOut className="text-lg" />
+          <span>Logout</span>
+        </button>
+      </div>
 
-                                    <SidebarLink link={link} iconName={link.icon} key={link.id} />
-                                )
+      {/* Confirmation Modal */}
+      {confirmationModal && <ConfirmationModal modalData={confirmationModal} />}
+    </div>
+  );
+};
 
-                            })
-                        }
-
-                    </div>
-
-                    <div className="mx-auto mt-6 mb-6 h-[1px] w-10/12 bg-richblack-600">
-
-                    </div>
-
-                    <div className="flex flex-col text-white">
-                        <SidebarLink
-                            link={{ name: "Setting", path: "dashboard/setting" }}
-                            iconName={"VscSettingsGear"}
-
-                        >
-                        </SidebarLink>
-
-
-                        <button
-                            onClick={() => setConfirmationModal({
-                                text1: "Are you sure",
-                                text2: "You will be logged out of your account",
-                                btn1Text: "LogOut",
-                                btn2Text: "Cancel",
-                                btn1Handler: () => dispatch(logout(navigate)),
-                                btn2Handler: () => setConfirmationModal(null)
-                            })}
-                            className="text-sm font-medium text-richblack-300"
-                        >
-                            <div className="flex items-center gap-x-2">
-                                <VscSignOut className="text-lg" />
-                                <span>Logout</span>
-                            </div>
-
-                        </button>
-
-                    </div>
-
-                </div>
-
-
-
-            </div>
-            {confirmationModal && <ConfirmationModal modalData={confirmationModal} />}
-        </>
-    )
-}
-
-export default Sidebar
+export default Sidebar;
