@@ -38,10 +38,10 @@ exports.resetPasswordToken = async (req,res)=>{
         console.log("updatedDEtails is",updatedDetails)
     //create url
 
-    const url = `http://localhost3000/update-password/${token}`
+    const url = `http://localhost:3000/update-password/${token}`
 
     //send mail containing the url
-    await mailSender(email,"Password reset link",`Password Reset Link${url}`);
+    await mailSender(email,"Password reset link",`Password Reset Link ${url}`);
     //return response
     return res.status(200).json({
         success:true,
