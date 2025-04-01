@@ -13,8 +13,6 @@ require("dotenv").config();
 exports.sendotp = async (req, res) => {
   try {
     const { email } = req.body;
-
-    // Check if user exists
     const checkUserPresent = await User.findOne({ email });
     if (checkUserPresent) {
       return res.status(409).json({
