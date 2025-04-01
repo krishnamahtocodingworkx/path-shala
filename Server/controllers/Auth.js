@@ -64,7 +64,7 @@ exports.sendotp = async (req, res) => {
     try {
       const emailResponse = await mailSender(
         email,
-        "Email verification from StudyNotion",
+        "Email verification from PathShala",
         otpTemplate(otp)
       );
       console.log("Email sent successfully:", emailResponse.response);
