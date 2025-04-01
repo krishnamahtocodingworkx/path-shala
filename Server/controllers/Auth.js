@@ -10,95 +10,269 @@ const Profile = require("../models/Profile");
 const otpTemplate = require("../mail/templates/emailVerificationTemplate");
 require("dotenv").config();
 
-//all three testing done
 exports.sendotp = async (req, res) => {
   try {
-    //fetch email from request body
     const { email } = req.body;
 
-    //check if user already exist or not
+    // Check if user exists
     const checkUserPresent = await User.findOne({ email });
-
-    //if user already exists the return a response
     if (checkUserPresent) {
-      return res.status(401).json({
+      return res.status(409).json({
         success: false,
         message: "User already exists",
       });
     }
-    // console.log("here we check user is present or not " ,checkUserPresent);
 
-    //generate otp
-    var otp = otpGenerator.generate(6, {
-      upperCaseAlphabets: false,
-      lowerCaseAlphabets: false,
-      specialChars: false,
-    });
-    // console.log("otp generated this is otp", otp);
+    // Remove old OTPs for this email (avoid clutter)
+    await OTP.deleteMany({ email });
 
-    //check unique otp or not
-    let result = await OTP.findOne({ otp: otp });
-    // console.log("otp ke model me ye otp mila ya nahi check", result);
-
-    while (result) {
+    // Generate a unique 6-digit OTP
+    let otp;
+    let attempts = 0;
+    do {
       otp = otpGenerator.generate(6, {
         upperCaseAlphabets: false,
         lowerCaseAlphabets: false,
         specialChars: false,
       });
+      attempts++;
+      if (attempts > 5) {
+        return res.status(500).json({
+          success: false,
+          message: "Failed to generate a unique OTP. Please try again.",
+        });
+      }
+    } while (await OTP.findOne({ otp }));
 
-      result = await OTP.findOne({ otp: otp });
-    }
+    // Save OTP to DB
+    await OTP.create({ email, otp });
 
-    //otp ki entry databsase me kro taki baad me verify kr ske
-
-    const otpPayload = {
-      email,
-      otp,
-    };
-    console.log("ye hai opt ka payload", otpPayload);
-
-    //create and entry for otp
-    const otpBody = await OTP.create(otpPayload);
-
+    // Send email with OTP
     try {
-      const emailResponse = await mailSender(
+      await mailSender(
         email,
         "Email verification from PathShala",
         otpTemplate(otp)
       );
-      console.log("Email sent successfully:", emailResponse.response);
     } catch (error) {
-      // If there's an error sending the email, log the error and return a 500 (Internal Server Error) error
-      console.error("Error occurred while sending email:", error);
+      console.error("Error sending email:", error);
       return res.status(500).json({
         success: false,
-        message: "Error occurred while sending email",
+        message: "Error sending email",
         error: error.message,
       });
     }
 
-    // console.log( "this is otpboyd",otpBody);
-
-    //return response successfully
     res.status(200).json({
       success: true,
       message: "OTP sent successfully",
       otp,
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     return res.status(500).json({
       success: false,
-      message: "Error while sending otp",
+      message: "Error while sending OTP",
     });
   }
 };
+
+//all three testing done
+// exports.sendotp = async (req, res) => {
+//   try {
+//     //fetch email from request body
+//     const { email } = req.body;
+
+//     //check if user already exist or not
+//     const checkUserPresent = await User.findOne({ email });
+
+//     //if user already exists the return a response
+//     if (checkUserPresent) {
+//       return res.status(401).json({
+//         success: false,
+//         message: "User already exists",
+//       });
+//     }
+//     // console.log("here we check user is present or not " ,checkUserPresent);
+
+//     //generate otp
+//     var otp = otpGenerator.generate(6, {
+//       upperCaseAlphabets: false,
+//       lowerCaseAlphabets: false,
+//       specialChars: false,
+//     });
+//     // console.log("otp generated this is otp", otp);
+
+//     //check unique otp or not
+//     let result = await OTP.findOne({ otp: otp });
+//     // console.log("otp ke model me ye otp mila ya nahi check", result);
+
+//     while (result) {
+//       otp = otpGenerator.generate(6, {
+//         upperCaseAlphabets: false,
+//         lowerCaseAlphabets: false,
+//         specialChars: false,
+//       });
+
+//       result = await OTP.findOne({ otp: otp });
+//     }
+
+//     //otp ki entry databsase me kro taki baad me verify kr ske
+
+//     const otpPayload = {
+//       email,
+//       otp,
+//     };
+//     console.log("ye hai opt ka payload", otpPayload);
+
+//     //create and entry for otp
+//     const otpBody = await OTP.create(otpPayload);
+
+//     try {
+//       const emailResponse = await mailSender(
+//         email,
+//         "Email verification from PathShala",
+//         otpTemplate(otp)
+//       );
+//       console.log("Email sent successfully:", emailResponse.response);
+//     } catch (error) {
+//       // If there's an error sending the email, log the error and return a 500 (Internal Server Error) error
+//       console.error("Error occurred while sending email:", error);
+//       return res.status(500).json({
+//         success: false,
+//         message: "Error occurred while sending email",
+//         error: error.message,
+//       });
+//     }
+
+//     // console.log( "this is otpboyd",otpBody);
+
+//     //return response successfully
+//     res.status(200).json({
+//       success: true,
+//       message: "OTP sent successfully",
+//       otp,
+//     });
+//   } catch (e) {
+//     console.log(e);
+//     return res.status(500).json({
+//       success: false,
+//       message: "Error while sending otp",
+//     });
+//   }
+// };
 //signUp ka handler
+
+// exports.signup = async (req, res) => {
+//   try {
+//     //data fetchh from requiest body
+//     const {
+//       firstName,
+//       lastName,
+//       email,
+//       password,
+//       confirmPassword,
+//       accountType,
+//       // contactNumber,
+//       otp,
+//     } = req.body;
+//     //validate kro
+
+//     if (
+//       !firstName ||
+//       !lastName ||
+//       !email ||
+//       !password ||
+//       !otp ||
+//       !confirmPassword ||
+//       !accountType
+//     ) {
+//       return res.status(403).json({
+//         success: false,
+//         message: "All fields are required",
+//       });
+//     }
+//     //2 password match kr lo password and confirm password KO
+//     if (password !== confirmPassword) {
+//       return res.status(400).json({
+//         success: false,
+//         message:
+//           "Password and ConfirmPassword are not the same please try again",
+//       });
+//     }
+
+//     //check user already exist or not
+
+//     const existingUser = await User.findOne({ email });
+//     if (existingUser) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "User is already registered",
+//       });
+//     }
+
+//     //find most recent otp for the user
+//     // Find the most recent OTP for the email
+//     const response = await OTP.find({ email }).sort({ createdAt: -1 }).limit(1);
+//     console.log("otp response  ",response);
+
+//     if (response.length === 0) {
+//       // OTP not found for the email
+//       return res.status(400).json({
+//         success: false,
+//         message: "The OTP is not valid",
+//       });
+//     } else if (otp !== response[0].otp) {
+//       // Invalid OTP
+//       return res.status(400).json({
+//         success: false,
+//         message: "The OTP is not valid",
+//       });
+//     }
+//     //hash password
+//     const hashPassword = await bcrypt.hash(password, 10);
+//     console.log("hashPassword", hashPassword);
+//     console.log("password is hash", hashPassword);
+
+//     //create entry in db
+
+//     const profileDetails = await Profile.create({
+//       gender: null,
+//       dateOfBirth: null,
+//       about: null,
+//       contactNumber: null,
+//     });
+
+//     //chal rha h yha tk
+//     const user = await User.create({
+//       firstName,
+//       lastName,
+//       email,
+//       // contactNumber,
+//       password: hashPassword,
+//       accountType: accountType,
+//       additionalDetails: profileDetails._id,
+//       // image:"",
+//       image: `https://api.dicebear.com/5.x/initials/svg?seed=${firstName} ${lastName}`,
+//     });
+//     // console.log("user is",user);
+//     //return response
+//     return res.status(200).json({
+//       success: true,
+//       message: "User is registered successfuly",
+//     });
+//   } catch (e) {
+//     console.log(e);
+//     return res.status(500).json({
+//       success: false,
+//       message: "user cannot be registerd try again",
+//     });
+//   }
+// };
 
 exports.signup = async (req, res) => {
   try {
-    //data fetchh from requiest body
+    // Fetch data from request body
     const {
       firstName,
       lastName,
@@ -106,11 +280,10 @@ exports.signup = async (req, res) => {
       password,
       confirmPassword,
       accountType,
-      // contactNumber,
       otp,
     } = req.body;
-    //validate kro
 
+    // Validate required fields
     if (
       !firstName ||
       !lastName ||
@@ -125,49 +298,50 @@ exports.signup = async (req, res) => {
         message: "All fields are required",
       });
     }
-    //2 password match kr lo password and confirm password KO
+
+    // Check password confirmation
     if (password !== confirmPassword) {
       return res.status(400).json({
         success: false,
-        message:
-          "Password and ConfirmPassword are not the same please try again",
+        message: "Password and Confirm Password do not match",
       });
     }
 
-    //check user already exist or not
+    // Ensure password meets security standards
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters long",
+      });
+    }
 
+    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({
+      return res.status(409).json({
         success: false,
         message: "User is already registered",
       });
     }
 
-    //find most recent otp for the user
-    // Find the most recent OTP for the email
-    const response = await OTP.find({ email }).sort({ createdAt: -1 }).limit(1);
-    console.log(response);
-    if (response.length === 0) {
-      // OTP not found for the email
-      return res.status(400).json({
-        success: false,
-        message: "The OTP is not valid",
-      });
-    } else if (otp !== response[0].otp) {
-      // Invalid OTP
+    // Fetch the most recent OTP
+    const otpRecord = await OTP.findOne({ email }).sort({ createdAt: -1 });
+    console.log("otp given by user :", otp);
+    console.log("otp in db :", otpRecord.otp);
+    if (!otpRecord || otp !== otpRecord.otp) {
       return res.status(400).json({
         success: false,
         message: "The OTP is not valid",
       });
     }
-    //hash password
+
+    // Delete OTP after use (prevents reuse)
+    await OTP.deleteOne({ _id: otpRecord._id });
+
+    // Hash password securely
     const hashPassword = await bcrypt.hash(password, 10);
-    console.log("hashPassword", hashPassword);
-    console.log("password is hash", hashPassword);
 
-    //create entry in db
-
+    // Create user profile details
     const profileDetails = await Profile.create({
       gender: null,
       dateOfBirth: null,
@@ -175,29 +349,26 @@ exports.signup = async (req, res) => {
       contactNumber: null,
     });
 
-    //chal rha h yha tk
-    const user = await User.create({
+    // Create user entry in database
+    await User.create({
       firstName,
       lastName,
       email,
-      // contactNumber,
       password: hashPassword,
-      accountType: accountType,
+      accountType,
       additionalDetails: profileDetails._id,
-      // image:"",
       image: `https://api.dicebear.com/5.x/initials/svg?seed=${firstName} ${lastName}`,
     });
-    // console.log("user is",user);
-    //return response
+
     return res.status(200).json({
       success: true,
-      message: "User is registered successfuly",
+      message: "User registered successfully",
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
     return res.status(500).json({
       success: false,
-      message: "user cannot be registerd try again",
+      message: "User registration failed. Please try again.",
     });
   }
 };

@@ -19,25 +19,25 @@ const OTPSchema = new mongoose.Schema({
 });
 
 //a function ->to send email
-async function sendVerificationEmail(email, otp) {
-  try {
-    const mailResponse = await mailSender(
-      email,
-      "Verification email from PathShala",
-      emailTemplate(otp)
-    );
-    console.log("Email sent successfully", mailResponse);
-  } catch (e) {
-    console.log("Error occured while sendign otp", e);
-    throw e;
-  }
-}
+// async function sendVerificationEmail(email, otp) {
+//   try {
+//     const mailResponse = await mailSender(
+//       email,
+//       "Verification email from PathShala",
+//       emailTemplate(otp)
+//     );
+//     console.log("Email sent successfully", mailResponse);
+//   } catch (e) {
+//     console.log("Error occured while sendign otp", e);
+//     throw e;
+//   }
+// }
 
-//premiddleware from mongoose
+// //premiddleware from mongoose
 
-OTPSchema.pre("save", async function (next) {
-  await sendVerificationEmail(this.email, this.otp);
-  next();
-});
+// OTPSchema.pre("save", async function (next) {
+//   await sendVerificationEmail(this.email, this.otp);
+//   next();
+// });
 
 module.exports = mongoose.model("OTP", OTPSchema);
