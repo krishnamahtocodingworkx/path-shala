@@ -45,7 +45,8 @@ function Navbar() {
     >
       <div className="flex w-11/12 max-w-maxContent items-center justify-between">
         {/* Logo */}
-        <Logo />
+        {/* <Logo /> */}
+        {token && <ProfileDropdown />}
 
         {/* Navigation Links */}
         <nav className="hidden md:block">
@@ -136,7 +137,8 @@ function Navbar() {
               </Link>
             </>
           )}
-          {token && <ProfileDropdown />}
+          {/* {token && <ProfileDropdown />} */}
+          <Logo />
         </div>
 
         {/* Mobile Menu Button */}
