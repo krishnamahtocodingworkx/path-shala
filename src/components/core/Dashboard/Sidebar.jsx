@@ -26,7 +26,7 @@ const Sidebar = () => {
     return <div className="mt-10">Loading...</div>;
   }
   return (
-    <div className="flex flex-col w-full lg:w-[222px] lg:h-[calc(100vh-3.5rem)] bg-richblack-800 border-r border-richblack-700 py-6">
+    <div className="flex flex-col w-full lg:w-[252px] lg:h-[calc(100vh-3.5rem)] bg-richblack-800 border-r border-richblack-700 py-6">
       {/* Sidebar Links */}
       <div className="flex flex-col space-y-2">
         {sidebarLinks.map((link) =>

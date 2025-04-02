@@ -55,10 +55,14 @@ function Navbar() {
                 {link.title === "Catalog" ? (
                   <div
                     className={`group flex cursor-pointer items-center gap-1 ${
-                      matchRoute("/catalog/:catalogName") ? "text-yellow-25" : "text-richblack-25"
+                      matchRoute("/catalog/:catalogName")
+                        ? "text-yellow-25"
+                        : "text-richblack-25"
                     }`}
                   >
-                    <p onClick={() => setIsCatalogOpen(!isCatalogOpen)}>{link.title}</p>
+                    <p onClick={() => setIsCatalogOpen(!isCatalogOpen)}>
+                      {link.title}
+                    </p>
                     <BsChevronDown />
 
                     {/* Dropdown Menu */}
@@ -70,13 +74,17 @@ function Navbar() {
                           subLinks
                             .filter((subLink) => subLink?.courses?.length > 0)
                             .map((subLink, i) => (
-                              <Link
-                                key={i}
-                                to={`/catalog/${subLink.name.replace(/\s+/g, "-").toLowerCase()}`}
-                                className="block py-2 px-4 hover:bg-richblack-50 rounded"
-                              >
-                                {subLink.name}
-                              </Link>
+                              <div onClick={() => setIsCatalogOpen(false)}>
+                                <Link
+                                  key={i}
+                                  to={`/catalog/${subLink.name
+                                    .replace(/\s+/g, "-")
+                                    .toLowerCase()}`}
+                                  className="block py-2 px-4 hover:bg-richblack-50 rounded"
+                                >
+                                  {subLink.name}
+                                </Link>
+                              </div>
                             ))
                         ) : (
                           <p className="text-center">No Courses Found</p>
@@ -86,7 +94,15 @@ function Navbar() {
                   </div>
                 ) : (
                   <Link to={link.path}>
-                    <p className={matchRoute(link.path) ? "text-yellow-25" : "text-richblack-25"}>{link.title}</p>
+                    <p
+                      className={
+                        matchRoute(link.path)
+                          ? "text-yellow-25"
+                          : "text-richblack-25"
+                      }
+                    >
+                      {link.title}
+                    </p>
                   </Link>
                 )}
               </li>
@@ -124,8 +140,15 @@ function Navbar() {
         </div>
 
         {/* Mobile Menu Button */}
-        <button className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-          {isMenuOpen ? <RxCross1 fontSize={24} color="white" /> : <AiOutlineMenu fontSize={24} color="white" />}
+        <button
+          className="md:hidden"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+        >
+          {isMenuOpen ? (
+            <RxCross1 fontSize={24} color="white" />
+          ) : (
+            <AiOutlineMenu fontSize={24} color="white" />
+          )}
         </button>
       </div>
 
@@ -139,7 +162,9 @@ function Navbar() {
                   <>
                     <div
                       className={`flex cursor-pointer items-center justify-center gap-1 ${
-                        matchRoute("/catalog/:catalogName") ? "text-yellow-25" : "text-richblack-25"
+                        matchRoute("/catalog/:catalogName")
+                          ? "text-yellow-25"
+                          : "text-richblack-25"
                       }`}
                       onClick={() => setIsCatalogOpen(!isCatalogOpen)}
                     >
@@ -157,7 +182,9 @@ function Navbar() {
                             .map((subLink, i) => (
                               <Link
                                 key={i}
-                                to={`/catalog/${subLink.name.replace(/\s+/g, "-").toLowerCase()}`}
+                                to={`/catalog/${subLink.name
+                                  .replace(/\s+/g, "-")
+                                  .toLowerCase()}`}
                                 className="block py-2 px-4 hover:bg-richblack-50 rounded"
                                 onClick={() => setIsMenuOpen(false)}
                               >
@@ -172,7 +199,15 @@ function Navbar() {
                   </>
                 ) : (
                   <Link to={link.path} onClick={() => setIsMenuOpen(false)}>
-                    <p className={matchRoute(link.path) ? "text-yellow-25" : "text-richblack-25"}>{link.title}</p>
+                    <p
+                      className={
+                        matchRoute(link.path)
+                          ? "text-yellow-25"
+                          : "text-richblack-25"
+                      }
+                    >
+                      {link.title}
+                    </p>
                   </Link>
                 )}
               </li>
@@ -183,10 +218,14 @@ function Navbar() {
             {!token ? (
               <>
                 <Link to="/login">
-                  <button className="w-40 py-2 rounded-md bg-blue-600 text-white">Log in</button>
+                  <button className="w-40 py-2 rounded-md bg-blue-600 text-white">
+                    Log in
+                  </button>
                 </Link>
                 <Link to="/signup">
-                  <button className="w-40 py-2 rounded-md bg-blue-700 text-white">Sign up</button>
+                  <button className="w-40 py-2 rounded-md bg-blue-700 text-white">
+                    Sign up
+                  </button>
                 </Link>
               </>
             ) : (
