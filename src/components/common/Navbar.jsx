@@ -45,6 +45,7 @@ function Navbar() {
     >
       <div className="flex w-11/12 max-w-maxContent items-center justify-between">
         {/* Logo */}
+        
         <Logo />
 
         {/* Navigation Links */}
