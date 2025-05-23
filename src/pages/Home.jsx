@@ -11,10 +11,32 @@ import InstructorSection from "../components/core/Homepage/InstructorSection";
 // import ExploreMore from "../components/core/Homepage/ExploreMore"
 import Footer from "../components/common/Footer";
 import ReviewSlider from "../components/common/ReviewSlider";
+import { TbMessageChatbot } from "react-icons/tb";
+import Chatbot from "react-chatbot-kit";
+import config from "../utils/config";
+import MessageParser from "../utils/MessageParser";
+import ActionProvider from "../utils/ActionProvider";
+import { IoMdClose } from "react-icons/io";
+
 
 const Home = () => {
+  const [showChat, setShowChat] = React.useState(false);
   return (
     <div>
+      <button
+        className="fixed bottom-4 right-4 z-[1000] bg-richblack-800 py-2 px-4 text-white flex gap-3  items-center"
+        onClick={() => setShowChat(!showChat)}
+      >
+        {showChat ? "Close Chat" : "Chat Help"}
+        { showChat ? <IoMdClose fontSize={24} /> : <TbMessageChatbot fontSize={24} />}
+      </button>
+      {showChat && (
+        <Chatbot
+          config={config}
+          messageParser={MessageParser}
+          actionProvider={ActionProvider}
+        />
+      )}
       {/* section1 */}
       <div className="max-w-maxContent relative flex flex-col w-11/12 items-center text-white justify-between mx-auto">
         <Link to={"/signup"}>

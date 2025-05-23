@@ -3,15 +3,164 @@
 @tailwind components;
 @tailwind utilities;
 
-html,body{
-    overflow-x: hidden;
+html,
+body {
+  overflow-x: hidden;
 }
 
-.homepage-bg{
-   background: url("../src/assets/Images/bghome.svg");
+.homepage-bg {
+  background: url("../src/assets/Images/bghome.svg");
 }
 
-.input--box{
-    padding: 5px;
-    border-radius: 5px;
+.input--box {
+  padding: 5px;
+  border-radius: 5px;
 }
+/* Main chatbot container */
+.react-chatbot-kit-chat-container {
+    scrollbar-width: none;        /* Firefox */
+    -ms-overflow-style: none;     /* IE 10+ */    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(44, 51, 63, 0.16);
+    border-radius: 25px 25px 0px 25px;
+    max-width: 350px;
+    min-width: 320px;
+    background: #f1f2ff; /* richblack.5 */
+    position: fixed;
+    bottom: 62px;
+    right: 20px;
+    z-index: 1000;
+    font-family: "Segoe UI", "Roboto", Arial, sans-serif;
+    border: 1.5px solid #c5c7d4; /* richblack.50 */
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: 0;
+    max-height: 600px;
+    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .react-chatbot-kit-chat-inner-container::-webkit-scrollbar {
+    display: none;                /* Chrome, Safari, Opera */
+  }
+  
+  /* Header */
+  .react-chatbot-kit-chat-header {
+    background: linear-gradient(90deg, #073b4c 0%, #06d6a0 100%);
+    color: #fff;
+    font-weight: 600;
+    font-size: 1.15rem;
+    padding: 16px 24px;
+    border-radius: 20px 20px 0 0;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid #c5c7d4; /* richblack.50 */
+  }
+  
+  /* Chat body - key to auto height! */
+  .react-chatbot-kit-chat-inner-container {
+    background: #ecf5ff; /* richblue.5 */
+    padding: 16px 12px;
+    border-radius: 0 0 20px 20px;
+    min-height: 40px;      /* Just enough for one message */
+    max-height: 400px;     /* Grows up to this, then scrolls */
+    overflow-y: auto;
+    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    flex: 1 1 auto;        /* Let it grow/shrink with content */
+  }
+  
+  /* Bot message bubble */
+  .react-chatbot-kit-chat-bot-message {
+    background: #c6d6e1; /* richblue.25 */
+    color: #073b4c;      /* richblue.400 */
+    border-radius: 16px 16px 16px 4px;
+    padding: 12px 16px;
+    margin: 10px 0 10px 0;
+    font-size: 1rem;
+    box-shadow: 0 2px 8px rgba(7, 59, 76, 0.04);
+    max-width: 80%;
+    border: 1px solid #a0b7c3; /* richblue.50 */
+  }
+  
+  /* User message bubble */
+  .react-chatbot-kit-user-chat-message {
+    background: #06d6a0; /* caribbeangreen.100 */
+    color: #fff;
+    border-radius: 16px 16px 4px 16px;
+    padding: 12px 16px;
+    margin: 10px 0 10px auto;
+    font-size: 1rem;
+    box-shadow: 0 2px 8px rgba(6, 214, 160, 0.08);
+    max-width: 80%;
+    border: 1px solid #44e4bf; /* caribbeangreen.50 */
+  }
+  
+  /* Input area */
+  .react-chatbot-kit-chat-input-container {
+    background: #f9f9f9; /* pure-greys.5 */
+    border-top: 1px solid #c5c7d4; /* richblack.50 */
+    padding: 12px 16px;
+    border-radius: 0 0 20px 20px;
+  }
+  
+  /* Input field */
+  .react-chatbot-kit-chat-input {
+    border: 1px solid #b5b5b5; /* pure-greys.100 */
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 1rem;
+    outline: none;
+    width: 80%;
+    margin-right: 8px;
+    transition: border 0.2s;
+    background: #fff;
+  }
+  
+  .react-chatbot-kit-chat-input:focus {
+    border: 1.5px solid #06d6a0; /* caribbeangreen.100 */
+  }
+  
+  /* Send button small and minimal */
+  .react-chatbot-kit-chat-btn-send {
+    background: linear-gradient(90deg, #06d6a0 0%, #073b4c 100%);
+    border: none;
+    color: #fff;
+    border-radius: 8px;
+    padding: 6px 10px 6px 30px; /* space for icon */
+    font-size: 0.95rem;
+    cursor: pointer;
+    font-weight: 500;
+    position: relative;
+    min-width: 36px;
+    min-height: 32px;
+    transition: background 0.2s;
+    box-shadow: none;
+  }
+  
+  /* Only icon, smaller size */
+  .react-chatbot-kit-chat-btn-send::before {
+    content: "";
+    display: inline-block;
+    background-image: url("data:image/svg+xml,%3Csvg width='14' height='14' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M22 2 11 13'%3E%3C/path%3E%3Cpath d='M22 2 15 22 11 13 2 9l20-7z'%3E%3C/path%3E%3C/svg%3E");
+    width: 14px;
+    height: 14px;
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-size: contain;
+    background-repeat: no-repeat;
+  }
+  
+  /* Remove text label for minimalism */
+  .react-chatbot-kit-chat-btn-send::after {
+    content: "";
+  }
+  
+  /* Hide the default avatar for a cleaner look (optional) */
+  .react-chatbot-kit-chat-bot-avatar-container,
+  .react-chatbot-kit-chat-user-avatar-container,
+  .react-chatbot-kit-user-avatar-icon {
+    display: none;
+  }
+  
