@@ -8,6 +8,7 @@ import { courseEndpoints } from "../apis"
 const {
   COURSE_DETAILS_API,
   COURSE_CATEGORIES_API,
+  CREATE_CATEGORY_API,
   GET_ALL_COURSE_API,
   CREATE_COURSE_API,
   EDIT_COURSE_API,
@@ -79,6 +80,26 @@ export const fetchCourseCategories = async () => {
     console.log("COURSE_CATEGORY_API API ERROR............", error)
     toast.error(error.message)
   }
+  return result
+}
+
+export const createCourseCategory = async (data, token) => {
+  const toastId = toast.loading("Creating category...")
+  let result = null
+  try {
+    const response = await apiConnector("POST", CREATE_CATEGORY_API, data, {
+      Authorisation: `Bearer ${token}`,
+    })
+    if (!response?.data?.success) {
+      throw new Error(response?.data?.message || "Could not create category")
+    }
+    toast.success("Category created successfully")
+    result = response?.data?.data
+  } catch (error) {
+    console.log("CREATE_CATEGORY_API ERROR............", error)
+    toast.error(error?.response?.data?.message || error.message)
+  }
+  toast.dismiss(toastId)
   return result
 }
 

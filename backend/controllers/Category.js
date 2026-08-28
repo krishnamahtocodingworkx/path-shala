@@ -8,32 +8,43 @@ const { ExceptionMessage, SuccessMessage } = require("../utils/constants");
 //testing done
 exports.createCategory = async (req, res) => {
   try {
-    //fetch data
     const { name, description } = req.body;
-    //validation
-    if (!name || !description) {
+    const trimmedName = name?.trim();
+
+    if (!trimmedName) {
       return res.status(400).json({
         success: false,
-        message: ExceptionMessage.ALL_FIELDS_REQUIRED,
-      })
+        message: ExceptionMessage.CATEGORY_NAME_REQUIRED,
+      });
     }
 
-    //create entry in db
-    const categoryDetails = await Category.create({
-      name: name,
-      description: description,
+    const existingCategory = await Category.findOne({
+      $expr: { $eq: [{ $toLower: "$name" }, trimmedName.toLowerCase()] },
     });
-    console.log(categoryDetails);
+
+    if (existingCategory) {
+      return res.status(409).json({
+        success: false,
+        message: ExceptionMessage.CATEGORY_ALREADY_EXISTS,
+      });
+    }
+
+    const categoryDetails = await Category.create({
+      name: trimmedName,
+      description: description?.trim() || trimmedName,
+    });
+
     return res.status(200).json({
       success: true,
-      message: SuccessMessage.CATEGORY_CREATED
-    })
-  } catch (e) {
+      message: SuccessMessage.CATEGORY_CREATED,
+      data: categoryDetails,
+    });
+  } catch (error) {
     console.log(error);
     return res.status(500).json({
       success: false,
       message: error.message,
-    })
+    });
   }
 }
 

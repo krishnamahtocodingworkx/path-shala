@@ -81,6 +81,27 @@ exports.isInstructor = async (req, res, next) => {
   }
 };
 
+exports.isInstructorOrAdmin = async (req, res, next) => {
+  try {
+    if (
+      req.user.accountType !== USER_ROLE.INSTRUCTOR &&
+      req.user.accountType !== USER_ROLE.ADMIN
+    ) {
+      return res.status(401).json({
+        success: false,
+        message: ExceptionMessage.INSTRUCTOR_OR_ADMIN_ONLY_ROUTE,
+      });
+    }
+    next();
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      success: false,
+      message: ExceptionMessage.USER_ROLE_VERIFICATION_FAILED,
+    });
+  }
+};
+
 //isAdmin ka middlware
 exports.isAdmin = async (req, res, next) => {
   try {

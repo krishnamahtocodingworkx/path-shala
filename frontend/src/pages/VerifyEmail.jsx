@@ -20,7 +20,7 @@ const VerifyEmail = () => {
 
   useEffect(() => {
     if (!signupData) {
-      navigate("/signup");
+      navigate("/login");
     }
   }, [signupData, navigate]);
 

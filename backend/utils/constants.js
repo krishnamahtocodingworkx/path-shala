@@ -33,6 +33,7 @@ const ExceptionMessage = {
   STUDENT_ONLY_ROUTE: "Students can only perform this action. This is a protected route for students only.",
   INSTRUCTOR_ONLY_ROUTE: "Instructors can only perform this action. This is a protected route for instructors only.",
   ADMIN_ONLY_ROUTE: "Admins can only perform this action. This is a protected route for admins only.",
+  INSTRUCTOR_OR_ADMIN_ONLY_ROUTE: "Only instructors and admins can perform this action.",
   USER_ROLE_VERIFICATION_FAILED: "User role cannot be verified.",
   INSTRUCTOR_ROLE_VERIFICATION_FAILED: "Instructor role cannot be verified. Please try again.",
   ADMIN_ROLE_VERIFICATION_FAILED: "Admin role cannot be verified. Please try again.",
@@ -48,6 +49,8 @@ const ExceptionMessage = {
   // Category
   CATEGORY_NOT_FOUND: "Category not found.",
   CATEGORY_DETAILS_NOT_FOUND: "Category details not found.",
+  CATEGORY_ALREADY_EXISTS: "A category with this name already exists.",
+  CATEGORY_NAME_REQUIRED: "Category name is required.",
   NO_COURSES_IN_CATEGORY: "No courses found for the selected category.",
 
   // Course

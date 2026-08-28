@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux"
 
 import {
   addCourseDetails,
+  createCourseCategory,
   editCourseDetails,
   fetchCourseCategories,
 } from "../../../../../services/operations/courseDetailsAPI"
@@ -31,26 +32,33 @@ export default function CourseInformationForm() {
   const { course, editCourse } = useSelector((state) => state.course)
   const [loading, setLoading] = useState(false)
   const [courseCategories, setCourseCategories] = useState([])
+  const [showAddCategory, setShowAddCategory] = useState(false)
+  const [newCategoryName, setNewCategoryName] = useState("")
+  const [newCategoryDescription, setNewCategoryDescription] = useState("")
+  const [categoryLoading, setCategoryLoading] = useState(false)
 
-  useEffect(() => {
-    const getCategories = async () => {
+  const getCategories = async ({ withFormLoading = true } = {}) => {
+    if (withFormLoading) {
       setLoading(true)
-      const categories = await fetchCourseCategories()
-      if (categories.length > 0) {
-        // console.log("categories", categories)
-        setCourseCategories(categories)
-      }
+    }
+    const categories = await fetchCourseCategories()
+    if (categories?.length > 0) {
+      setCourseCategories(categories)
+    }
+    if (withFormLoading) {
       setLoading(false)
     }
-    // if form is in edit mode
+    return categories || []
+  }
+
+  useEffect(() => {
     if (editCourse) {
-      // console.log("data populated", editCourse)
       setValue("courseTitle", course.courseName)
       setValue("courseShortDesc", course.courseDescription)
       setValue("coursePrice", course.price)
       setValue("courseTags", course.tag)
       setValue("courseBenefits", course.whatYouWillLearn)
-      setValue("courseCategory", course.category)
+      setValue("courseCategory", course.category?._id || course.category)
       setValue("courseRequirements", course.instructions)
       setValue("courseImage", course.thumbnail)
     }
@@ -58,6 +66,35 @@ export default function CourseInformationForm() {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const handleCreateCategory = async () => {
+    const trimmedName = newCategoryName.trim()
+    if (!trimmedName) {
+      toast.error("Category name is required")
+      return
+    }
+
+    setCategoryLoading(true)
+    const createdCategory = await createCourseCategory(
+      {
+        name: trimmedName,
+        description: newCategoryDescription.trim(),
+      },
+      token
+    )
+    setCategoryLoading(false)
+
+    if (createdCategory) {
+      const categories = await getCategories({ withFormLoading: false })
+      const nextCategories =
+        categories?.length > 0 ? categories : [...courseCategories, createdCategory]
+      setCourseCategories(nextCategories)
+      setValue("courseCategory", createdCategory._id, { shouldValidate: true })
+      setNewCategoryName("")
+      setNewCategoryDescription("")
+      setShowAddCategory(false)
+    }
+  }
 
   const isFormUpdated = () => {
     const currentValues = getValues()
@@ -68,7 +105,8 @@ export default function CourseInformationForm() {
       currentValues.coursePrice !== course.price ||
       currentValues.courseTags.toString() !== course.tag.toString() ||
       currentValues.courseBenefits !== course.whatYouWillLearn ||
-      currentValues.courseCategory._id !== course.category._id ||
+      (currentValues.courseCategory?._id || currentValues.courseCategory) !==
+        (course.category?._id || course.category) ||
       currentValues.courseRequirements.toString() !==
         course.instructions.toString() ||
       currentValues.courseImage !== course.thumbnail
@@ -107,8 +145,14 @@ export default function CourseInformationForm() {
         if (currentValues.courseBenefits !== course.whatYouWillLearn) {
           formData.append("whatYouWillLearn", data.courseBenefits)
         }
-        if (currentValues.courseCategory._id !== course.category._id) {
-          formData.append("category", data.courseCategory)
+        if (
+          (currentValues.courseCategory?._id || currentValues.courseCategory) !==
+          (course.category?._id || course.category)
+        ) {
+          formData.append(
+            "category",
+            data.courseCategory?._id || data.courseCategory
+          )
         }
         if (
           currentValues.courseRequirements.toString() !==
@@ -231,17 +275,71 @@ export default function CourseInformationForm() {
       <option value="" disabled>
         Choose a Category
       </option>
-      {!loading &&
-        courseCategories?.map((category, index) => (
-          <option key={index} value={category?._id}>
-            {category?.name}
-          </option>
-        ))}
+      {courseCategories?.map((category) => (
+        <option key={category._id} value={category._id}>
+          {category?.name}
+        </option>
+      ))}
     </select>
     {errors.courseCategory && (
       <span className="text-xs text-red-400">
         Course Category is required
       </span>
+    )}
+
+    {!showAddCategory ? (
+      <button
+        type="button"
+        onClick={() => setShowAddCategory(true)}
+        className="self-start text-sm font-medium text-yellow-400 hover:text-yellow-300"
+      >
+        Can&apos;t find a category? Add new
+      </button>
+    ) : (
+      <div className="space-y-3 rounded-md border border-gray-600 bg-gray-800 p-4">
+        <p className="text-sm font-medium text-yellow-50">Add a new category</p>
+        <input
+          type="text"
+          value={newCategoryName}
+          onChange={(e) => setNewCategoryName(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault()
+              handleCreateCategory()
+            }
+          }}
+          placeholder="Category name"
+          className="w-full rounded-md border border-gray-600 bg-gray-900 p-3 text-black focus:border-yellow-400 focus:outline-none"
+        />
+        <textarea
+          value={newCategoryDescription}
+          onChange={(e) => setNewCategoryDescription(e.target.value)}
+          placeholder="Category description (optional)"
+          className="w-full min-h-[80px] rounded-md border border-gray-600 bg-gray-900 p-3 text-black focus:border-yellow-400 focus:outline-none"
+        />
+        <div className="flex gap-x-2">
+          <button
+            type="button"
+            onClick={handleCreateCategory}
+            disabled={categoryLoading}
+            className="rounded-md bg-yellow-500 px-4 py-2 text-sm font-semibold text-black transition hover:bg-yellow-600 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {categoryLoading ? "Adding..." : "Add Category"}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setShowAddCategory(false)
+              setNewCategoryName("")
+              setNewCategoryDescription("")
+            }}
+            disabled={categoryLoading}
+            className="rounded-md bg-gray-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-500"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
     )}
   </div>
 
