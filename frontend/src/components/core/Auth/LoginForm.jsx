@@ -3,12 +3,14 @@ import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { login } from "../../../services/operations/authAPI";
+import AuthSubmitButton from "./AuthSubmitButton";
 
 import { useState } from "react";
 
 const LoginForm = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -23,12 +25,18 @@ const LoginForm = () => {
     }));
   };
 
-  const handleOnSubmit = (e) => {
+  const handleOnSubmit = async (e) => {
     e.preventDefault();
-    dispatch(login(email, password, navigate));
+    setIsSubmitting(true);
+    try {
+      await dispatch(login(email, password, navigate));
+    } catch (error) {
+      // Error toast is handled in authAPI
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  console.log("show password :", showPassword);
   return (
     <form
       className="mt-6 flex w-full flex-col gap-y-4"
@@ -40,15 +48,16 @@ const LoginForm = () => {
         </p>
         <input
           required
-          type="text"
+          type="email"
           name="email"
           value={email}
           onChange={handleOnChange}
           placeholder="Enter email address"
+          disabled={isSubmitting}
           style={{
             boxShadow: "inset 0px -1px 0px rgba(255, 255, 255, 0.18)",
           }}
-          className="w-full rounded-[0.5rem] bg-richblack-800 p-[12px] text-richblack-5"
+          className="w-full rounded-[0.5rem] bg-richblack-800 p-[12px] text-richblack-5 disabled:opacity-70"
         />
       </label>
 
@@ -62,6 +71,7 @@ const LoginForm = () => {
           value={password}
           onChange={handleOnChange}
           placeholder="Enter Your Password"
+          disabled={isSubmitting}
           style={{
             boxShadow: "inset 0px -1px 0px rgba(255, 255, 255, 0.18)",
           }}
@@ -86,12 +96,7 @@ const LoginForm = () => {
           </p>
         </Link>
       </label>
-      <button
-        type="submit"
-        className="mt-6 rounded-[8px] bg-yellow-50 py-[8px] px-[12px] font-medium text-richblack-900"
-      >
-        Sign In
-      </button>
+      <AuthSubmitButton isSubmitting={isSubmitting}>Sign In</AuthSubmitButton>
     </form>
   );
 };

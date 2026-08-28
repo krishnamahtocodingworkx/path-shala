@@ -1,4 +1,5 @@
 const Category = require("../models/Category");
+const { ExceptionMessage, SuccessMessage } = require("../utils/constants");
 
 //create Tag ka handler function
 // showAllCategories,
@@ -13,7 +14,7 @@ exports.createCategory = async (req, res) => {
     if (!name || !description) {
       return res.status(400).json({
         success: false,
-        message: "All fields are required",
+        message: ExceptionMessage.ALL_FIELDS_REQUIRED,
       })
     }
 
@@ -25,7 +26,7 @@ exports.createCategory = async (req, res) => {
     console.log(categoryDetails);
     return res.status(200).json({
       success: true,
-      message: "Category created successfully"
+      message: SuccessMessage.CATEGORY_CREATED
     })
   } catch (e) {
     console.log(error);
@@ -44,7 +45,7 @@ exports.showAllCategories = async (req, res) => {
     const allCategory = await Category.find({});
     return res.status(200).json({
       success: true,
-      message: "All tags return successfully",
+      message: SuccessMessage.TAGS_FETCHED,
       data: allCategory
     })
 
@@ -78,14 +79,14 @@ exports.categoryPageDetails = async (req, res) => {
       console.log("Category not found.")
       return res
         .status(404)
-        .json({ success: false, message: "Category not found" })
+        .json({ success: false, message: ExceptionMessage.CATEGORY_NOT_FOUND })
     }
             // Handle the case when there are no courses
     if (selectedCategory.courses.length === 0) {
       console.log("No courses found for the selected category.")
       return res.status(404).json({
         success: false,
-        message: "No courses found for the selected category.",
+        message: ExceptionMessage.NO_COURSES_IN_CATEGORY,
       })
     }
 
@@ -141,7 +142,7 @@ exports.categoryPageDetails = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: ExceptionMessage.INTERNAL_SERVER_ERROR,
       error: error.message,
     })
   }

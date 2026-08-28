@@ -1,27 +1,35 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useState } from "react";
 import OtpInput from "react-otp-input";
-import { useNavigate, useNavigation } from "react-router-dom";
-import { Link } from "react-router-dom";
-import { sendOtp } from "../services/operations/authAPI";
-import { signUp } from "../services/operations/authAPI";
+import { useNavigate, Link } from "react-router-dom";
+import { sendOtp, signUp } from "../services/operations/authAPI";
+import AuthPageLayout from "../components/core/Auth/AuthPageLayout";
+import AuthSubmitButton from "../components/core/Auth/AuthSubmitButton";
+
+const inputStyle = {
+  boxShadow: "inset 0px -1px 0px rgba(255, 255, 255, 0.18)",
+};
 
 const VerifyEmail = () => {
-  const { loading, signupData } = useSelector((state) => state.auth);
+  const { signupData } = useSelector((state) => state.auth);
+  const [otp, setOtp] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!signupData) {
       navigate("/signup");
     }
-  }, []);
+  }, [signupData, navigate]);
 
-  const [otp, setOtp] = useState("");
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
-  const handleOnSubmit = (e) => {
+  const handleOnSubmit = async (e) => {
     e.preventDefault();
+
+    if (!signupData || otp.length !== 6) {
+      return;
+    }
 
     const {
       accountType,
@@ -31,74 +39,96 @@ const VerifyEmail = () => {
       password,
       confirmPassword,
     } = signupData;
-    dispatch(
-      signUp(
-        accountType,
-        firstName,
-        lastName,
-        email,
-        password,
-        confirmPassword,
-        otp,
-        navigate
-      )
-    );
+
+    setIsSubmitting(true);
+    try {
+      await dispatch(
+        signUp(
+          accountType,
+          firstName,
+          lastName,
+          email,
+          password,
+          confirmPassword,
+          otp,
+          navigate
+        )
+      );
+    } catch (error) {
+      // Error toast is handled in authAPI
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  const handleResendOtp = async () => {
+    if (!signupData?.email || isResending) {
+      return;
+    }
+
+    setIsResending(true);
+    setOtp("");
+    try {
+      await dispatch(sendOtp(signupData.email, null, signupData));
+    } catch (error) {
+      // Error toast is handled in authAPI
+    } finally {
+      setIsResending(false);
+    }
+  };
+
+  if (!signupData) {
+    return null;
+  }
+
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-900">
-      {loading ? (
-        <div className="text-white text-lg">Loading...</div>
-      ) : (
-        <div className="bg-gray-800 text-white p-6 rounded-lg shadow-lg w-full max-w-md">
-          <h1 className="text-2xl font-bold text-center mb-2">Verify Email</h1>
-          <p className="text-center text-gray-300 mb-4">
-            A verification code has been sent to you. Enter the code below.
-          </p>
-
-          <form
-            onSubmit={otp.length === 6 ? handleOnSubmit : () => {}}
-            className="flex flex-col gap-4"
-          >
-            <OtpInput
-              value={otp}
-              onChange={setOtp}
-              numInputs={6}
-              renderSeparator={<span className="mx-1">-</span>}
-              renderInput={(props) => (
-                <input
-                  {...props}
-                  className="text-center text-black border border-gray-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  style={{ height: "40px", width: "40px" }}
-                />
-              )}
-            />
-
-            <button
-              disabled={otp.length !== 6}
-              type="submit"
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 rounded transition disabled:bg-gray-400 disabled:cursor-not-allowed"
-            >
-              Verify Email
-            </button>
-          </form>
-
-          <div className="text-center mt-4">
-            <Link to="/login" className="text-blue-400 hover:underline">
-              Back to Login
-            </Link>
-          </div>
-
-          <div className="text-center mt-2">
-            <button
-              onClick={() => dispatch(sendOtp(signupData.email))}
-              className="text-sm text-gray-400 hover:text-white transition"
-            >
-              Resend it
-            </button>
-          </div>
+    <AuthPageLayout
+      title="Verify your email"
+      description={`Enter the 6-digit code sent to ${signupData.email}.`}
+    >
+      <form onSubmit={handleOnSubmit} className="flex flex-col gap-y-6">
+        <div className="flex justify-center">
+          <OtpInput
+            value={otp}
+            onChange={setOtp}
+            numInputs={6}
+            shouldAutoFocus
+            inputType="tel"
+            renderInput={(props) => (
+              <input
+                {...props}
+                className="mx-1 rounded-[0.5rem] bg-richblack-800 p-[12px] text-center text-[1.125rem] font-semibold text-richblack-5 outline-none focus:ring-2 focus:ring-yellow-50"
+                style={{ ...inputStyle, height: "48px", width: "48px" }}
+              />
+            )}
+          />
         </div>
-      )}
-    </div>
+
+        <AuthSubmitButton
+          isSubmitting={isSubmitting}
+          disabled={otp.length !== 6}
+        >
+          Verify Email
+        </AuthSubmitButton>
+      </form>
+
+      <div className="mt-4 text-center">
+        <button
+          type="button"
+          onClick={handleResendOtp}
+          disabled={isResending || isSubmitting}
+          className="text-sm text-richblack-100 transition hover:text-richblack-5 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isResending ? "Sending new code..." : "Didn't receive the code? Resend"}
+        </button>
+      </div>
+
+      <div className="mt-4 text-center">
+        <Link to="/login" className="text-sm text-blue-100 hover:underline">
+          Back to Login
+        </Link>
+      </div>
+    </AuthPageLayout>
   );
 };
 

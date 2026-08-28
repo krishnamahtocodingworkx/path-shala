@@ -1,6 +1,7 @@
 const Section = require("../models/Section");
 const Course = require("../models/Course");
 const SubSection = require("../models/SubSection");
+const { ExceptionMessage, SuccessMessage } = require("../utils/constants");
 // CREATE a new section
 exports.createSection = async (req, res) => {
 	try {
@@ -11,7 +12,7 @@ exports.createSection = async (req, res) => {
 		if (!sectionName || !courseId) {
 			return res.status(400).json({
 				success: false,
-				message: "Missing required properties",
+				message: ExceptionMessage.SECTION_PROPERTIES_MISSING,
 			});
 		}
 
@@ -39,14 +40,14 @@ exports.createSection = async (req, res) => {
 		// Return the updated course object in the response
 		res.status(200).json({
 			success: true,
-			message: "Section created successfully",
+			message: SuccessMessage.SECTION_CREATED,
 			updatedCourse,
 		});
 	} catch (error) {
 		// Handle errors
 		res.status(500).json({
 			success: false,
-			message: "Internal server error",
+			message: ExceptionMessage.INTERNAL_SERVER_ERROR,
 			error: error.message,
 		});
 	}
@@ -80,7 +81,7 @@ exports.updateSection = async (req, res) => {
 		console.error("Error updating section:", error);
 		res.status(500).json({
 			success: false,
-			message: "Internal server error",
+			message: ExceptionMessage.INTERNAL_SERVER_ERROR,
 		});
 	}
 };
@@ -100,7 +101,7 @@ exports.deleteSection = async (req, res) => {
 		if(!section) {
 			return res.status(404).json({
 				success:false,
-				message:"Section not Found",
+				message: ExceptionMessage.SECTION_NOT_FOUND,
 			})
 		}
 
@@ -120,14 +121,14 @@ exports.deleteSection = async (req, res) => {
 
 		res.status(200).json({
 			success:true,
-			message:"Section deleted",
+			message: SuccessMessage.SECTION_DELETED,
 			data:course
 		});
 	} catch (error) {
 		console.error("Error deleting section:", error);
 		res.status(500).json({
 			success: false,
-			message: "Internal server error",
+			message: ExceptionMessage.INTERNAL_SERVER_ERROR,
 		});
 	}
 };   

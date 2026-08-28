@@ -2,6 +2,7 @@
 const Section = require("../models/Section")
 const SubSection = require("../models/SubSection")
 const { uploadImageToCloudinary } = require("../utils/imageUploader")
+const { ExceptionMessage, SuccessMessage } = require("../utils/constants");
 
 // Create a new sub-section for a given section
 exports.createSubSection = async (req, res) => {
@@ -14,7 +15,7 @@ exports.createSubSection = async (req, res) => {
     if (!sectionId || !title || !description || !video) {
       return res
         .status(404)
-        .json({ success: false, message: "All Fields are Required" })
+        .json({ success: false, message: ExceptionMessage.ALL_FIELDS_REQUIRED })
     }
     console.log(video)
 
@@ -46,7 +47,7 @@ exports.createSubSection = async (req, res) => {
     console.error("Error creating new sub-section:", error)
     return res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: ExceptionMessage.INTERNAL_SERVER_ERROR,
       error: error.message,
     })
   }
@@ -60,7 +61,7 @@ exports.updateSubSection = async (req, res) => {
     if (!subSection) {
       return res.status(404).json({
         success: false,
-        message: "SubSection not found",
+        message: ExceptionMessage.SUBSECTION_NOT_FOUND,
       })
     }
 
@@ -92,14 +93,14 @@ exports.updateSubSection = async (req, res) => {
 
     return res.json({
       success: true,
-      message: "Section updated successfully",
+      message: SuccessMessage.SUBSECTION_UPDATED,
       data: updatedSection,
     })
   } catch (error) {
     console.error(error)
     return res.status(500).json({
       success: false,
-      message: "An error occurred while updating the section",
+      message: ExceptionMessage.SUBSECTION_UPDATE_FAILED,
     })
   }
 }
@@ -120,7 +121,7 @@ exports.deleteSubSection = async (req, res) => {
     if (!subSection) {
       return res
         .status(404)
-        .json({ success: false, message: "SubSection not found" })
+        .json({ success: false, message: ExceptionMessage.SUBSECTION_NOT_FOUND })
     }
 
     // find updated section and return it
@@ -130,14 +131,14 @@ exports.deleteSubSection = async (req, res) => {
 
     return res.json({
       success: true,
-      message: "SubSection deleted successfully",
+      message: SuccessMessage.SUBSECTION_DELETED,
       data: updatedSection,
     })
   } catch (error) {
     console.error(error)
     return res.status(500).json({
       success: false,
-      message: "An error occurred while deleting the SubSection",
+      message: ExceptionMessage.SUBSECTION_DELETE_FAILED,
     })
   }
 }

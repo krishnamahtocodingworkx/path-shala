@@ -8,16 +8,24 @@ const mailSender = require("../utils/mailSender");
 const { passwordUpdated } = require("../mail/templates/passwordUpdate");
 const Profile = require("../models/Profile");
 const otpTemplate = require("../mail/templates/emailVerificationTemplate");
+const { ExceptionMessage, SuccessMessage } = require("../utils/constants");
 require("dotenv").config();
 
 exports.sendotp = async (req, res) => {
   try {
-    const { email } = req.body;
+    const email = req.body.email?.trim().toLowerCase();
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: ExceptionMessage.ALL_FIELDS_REQUIRED,
+      });
+    }
+
     const checkUserPresent = await User.findOne({ email });
     if (checkUserPresent) {
       return res.status(409).json({
         success: false,
-        message: "User already exists",
+        message: ExceptionMessage.USER_ALREADY_EXIST,
       });
     }
 
@@ -37,7 +45,7 @@ exports.sendotp = async (req, res) => {
       if (attempts > 5) {
         return res.status(500).json({
           success: false,
-          message: "Failed to generate a unique OTP. Please try again.",
+          message: ExceptionMessage.OTP_GENERATION_FAILED,
         });
       }
     } while (await OTP.findOne({ otp }));
@@ -56,21 +64,20 @@ exports.sendotp = async (req, res) => {
       console.error("Error sending email:", error);
       return res.status(500).json({
         success: false,
-        message: "Error sending email",
+        message: ExceptionMessage.EMAIL_SEND_FAILED,
         error: error.message,
       });
     }
 
     res.status(200).json({
       success: true,
-      message: "OTP sent successfully",
-      otp,
+      message: SuccessMessage.OTP_SENT,
     });
   } catch (e) {
     console.error(e);
     return res.status(500).json({
       success: false,
-      message: "Error while sending OTP",
+      message: ExceptionMessage.OTP_SEND_FAILED,
     });
   }
 };
@@ -293,7 +300,7 @@ exports.signup = async (req, res) => {
     ) {
       return res.status(403).json({
         success: false,
-        message: "All fields are required",
+        message: ExceptionMessage.ALL_FIELDS_REQUIRED,
       });
     }
 
@@ -301,7 +308,7 @@ exports.signup = async (req, res) => {
     if (password !== confirmPassword) {
       return res.status(400).json({
         success: false,
-        message: "Password and Confirm Password do not match",
+        message: ExceptionMessage.PASSWORD_MISMATCH,
       });
     }
 
@@ -309,27 +316,49 @@ exports.signup = async (req, res) => {
     if (password.length < 6) {
       return res.status(400).json({
         success: false,
-        message: "Password must be at least 6 characters long",
+        message: ExceptionMessage.PASSWORD_TOO_SHORT,
       });
     }
 
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedOtp = String(otp).trim();
+
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return res.status(409).json({
         success: false,
-        message: "User is already registered",
+        message: ExceptionMessage.USER_ALREADY_REGISTERED,
       });
     }
 
-    // Fetch the most recent OTP
-    const otpRecord = await OTP.findOne({ email }).sort({ createdAt: -1 });
-    console.log("otp given by user :", otp);
-    console.log("otp in db :", otpRecord.otp);
-    if (!otpRecord || otp !== otpRecord.otp) {
+    // Fetch the most recent OTP for this email
+    const otpRecords = await OTP.find({ email: normalizedEmail })
+      .sort({ createdAt: -1 })
+      .limit(1);
+
+    const otpRecord = otpRecords[0];
+
+    if (!otpRecord) {
       return res.status(400).json({
         success: false,
-        message: "The OTP is not valid",
+        message: ExceptionMessage.OTP_EXPIRED,
+      });
+    }
+
+    const otpAgeMs = Date.now() - new Date(otpRecord.createdAt).getTime();
+    if (otpAgeMs > 5 * 60 * 1000) {
+      await OTP.deleteOne({ _id: otpRecord._id });
+      return res.status(400).json({
+        success: false,
+        message: ExceptionMessage.OTP_EXPIRED,
+      });
+    }
+
+    if (normalizedOtp !== String(otpRecord.otp).trim()) {
+      return res.status(400).json({
+        success: false,
+        message: ExceptionMessage.INVALID_OTP,
       });
     }
 
@@ -351,7 +380,7 @@ exports.signup = async (req, res) => {
     await User.create({
       firstName,
       lastName,
-      email,
+      email: normalizedEmail,
       password: hashPassword,
       accountType,
       additionalDetails: profileDetails._id,
@@ -360,13 +389,13 @@ exports.signup = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "User registered successfully",
+      message: SuccessMessage.SIGNED_UP,
     });
   } catch (e) {
     console.error(e);
     return res.status(500).json({
       success: false,
-      message: "User registration failed. Please try again.",
+      message: ExceptionMessage.USER_REGISTRATION_FAILED,
     });
   }
 };
@@ -377,22 +406,22 @@ exports.login = async (req, res) => {
   try {
     //get data from request body
     const { email, password } = req.body;
-    //validationn of data
     if (!email || !password) {
       return res.status(403).json({
         success: false,
-        message: "All fields are required please try again",
+        message: ExceptionMessage.ALL_FIELDS_REQUIRED,
       });
     }
 
-    //user check exist or not
-    const user = await User.findOne({ email }).populate("additionalDetails");
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const user = await User.findOne({ email: normalizedEmail }).populate("additionalDetails");
     // console.log("user hai ye",user);
 
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: "User is not registered please sign up first",
+        message: ExceptionMessage.USER_NOT_REGISTERED,
       });
     }
 
@@ -421,19 +450,19 @@ exports.login = async (req, res) => {
         success: true,
         token,
         user,
-        message: "Login successful",
+        message: SuccessMessage.LOGGED_IN,
       });
     } else {
       return res.status(401).json({
         success: false,
-        message: "password is incoreect",
+        message: ExceptionMessage.LOGIN_FAILED,
       });
     }
   } catch (e) {
     console.log(e);
     return res.status(500).json({
       success: false,
-      message: "Login failed please try again",
+      message: ExceptionMessage.LOGIN_FAILED,
     });
   }
 };
@@ -442,13 +471,37 @@ exports.login = async (req, res) => {
 //ye testing me check nhi hua hai
 exports.changePassword = async (req, res) => {
   try {
-    // Get user data from req.user
     const userDetails = await User.findById(req.user.id);
+    const { oldPassword, newPassword, confirmPassword } = req.body;
 
-    // Get old password, new password, and confirm new password from req.body
-    const { oldPassword, newPassword } = req.body;
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: ExceptionMessage.ALL_FIELDS_REQUIRED,
+      });
+    }
 
-    // Validate old password
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: ExceptionMessage.PASSWORD_MISMATCH,
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: ExceptionMessage.PASSWORD_TOO_SHORT,
+      });
+    }
+
+    if (oldPassword === newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: ExceptionMessage.OLD_NEW_PASSWORD_SAME,
+      });
+    }
+
     const isPasswordMatch = await bcrypt.compare(
       oldPassword,
       userDetails.password
@@ -457,7 +510,7 @@ exports.changePassword = async (req, res) => {
       // If old password does not match, return a 401 (Unauthorized) error
       return res
         .status(401)
-        .json({ success: false, message: "The password is incorrect" });
+        .json({ success: false, message: ExceptionMessage.INVALID_PASSWORD });
     }
 
     // Update password
@@ -484,7 +537,7 @@ exports.changePassword = async (req, res) => {
       console.error("Error occurred while sending email:", error);
       return res.status(500).json({
         success: false,
-        message: "Error occurred while sending email",
+        message: ExceptionMessage.EMAIL_SEND_FAILED,
         error: error.message,
       });
     }
@@ -492,13 +545,13 @@ exports.changePassword = async (req, res) => {
     // Return success response
     return res
       .status(200)
-      .json({ success: true, message: "Password updated successfully" });
+      .json({ success: true, message: SuccessMessage.CHANGE_PASSWORD_SUCCESS });
   } catch (error) {
     // If there's an error updating the password, log the error and return a 500 (Internal Server Error) error
     console.error("Error occurred while updating password:", error);
     return res.status(500).json({
       success: false,
-      message: "Error occurred while updating password",
+      message: ExceptionMessage.SOMETHING_WENT_WRONG,
       error: error.message,
     });
   }

@@ -1,22 +1,23 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const User = require("../models/User");
-const { USER_ROLE } = require("../utils/constants");
+const { USER_ROLE, ExceptionMessage } = require("../utils/constants");
 
 //auth ka middleware
 exports.auth = async (req, res, next) => {
   try {
     //extract token
+    const authHeader = req.header("Authorization") || req.header("Authorisation");
     const token =
       req.cookies.token ||
       req.body.token ||
-      req.header("Authorisation").replace("Bearer ", "");
+      (authHeader ? authHeader.replace("Bearer ", "") : null);
 
     //if token missing, then return response
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: "You are not authorized, token is missing",
+        message: ExceptionMessage.TOKEN_MISSING,
       });
     }
 
@@ -31,13 +32,13 @@ exports.auth = async (req, res, next) => {
       // If JWT verification fails, return 401 Unauthorized response
       return res
         .status(401)
-        .json({ success: false, message: "token is invalid" });
+        .json({ success: false, message: ExceptionMessage.TOKEN_INVALID });
     }
     next();
   } catch (error) {
     return res.status(401).json({
       success: false,
-      message: "You are not authorized, token is invalid",
+      message: ExceptionMessage.AUTH_INVALID_TOKEN,
     });
   }
 };
@@ -48,8 +49,7 @@ exports.isStudent = async (req, res, next) => {
     if (req.user.accountType !== USER_ROLE.STUDENT) {
       return res.status(401).json({
         success: false,
-        message:
-          "Students can only perform this action, This is protected route for Students only",
+        message: ExceptionMessage.STUDENT_ONLY_ROUTE,
       });
     }
     next();
@@ -57,7 +57,7 @@ exports.isStudent = async (req, res, next) => {
     console.log(e);
     return res.status(500).json({
       success: false,
-      message: "User role cannot be verified",
+      message: ExceptionMessage.USER_ROLE_VERIFICATION_FAILED,
     });
   }
 };
@@ -68,8 +68,7 @@ exports.isInstructor = async (req, res, next) => {
     if (req.user.accountType !== USER_ROLE.INSTRUCTOR) {
       return res.status(401).json({
         success: false,
-        message:
-          "Instructors can only perform this action, This is protected route for Instructors only",
+        message: ExceptionMessage.INSTRUCTOR_ONLY_ROUTE,
       });
     }
     next();
@@ -77,7 +76,7 @@ exports.isInstructor = async (req, res, next) => {
     console.log(e);
     return res.status(500).json({
       success: false,
-      message: "Instructor role cannot be verified,please try again",
+      message: ExceptionMessage.INSTRUCTOR_ROLE_VERIFICATION_FAILED,
     });
   }
 };
@@ -88,8 +87,7 @@ exports.isAdmin = async (req, res, next) => {
     if (req.user.accountType !== USER_ROLE.ADMIN) {
       return res.status(401).json({
         success: false,
-        message:
-          "Admins can only perform this action, This is protected route for Admins only",
+        message: ExceptionMessage.ADMIN_ONLY_ROUTE,
       });
     }
     next();
@@ -97,7 +95,7 @@ exports.isAdmin = async (req, res, next) => {
     console.log(e);
     return res.status(500).json({
       success: false,
-      message: "Admin role cannot be verified,please try again",
+      message: ExceptionMessage.ADMIN_ROLE_VERIFICATION_FAILED,
     });
   }
 };

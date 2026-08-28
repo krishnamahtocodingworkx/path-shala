@@ -6,6 +6,7 @@ const SubSection = require("../models/SubSection")
 const { uploadImageToCloudinary } = require("../utils/imageUploader");
 const CourseProgress = require("../models/CourseProgress")
 const { convertSecondsToDuration } = require("../utils/secToDuration")
+const { ExceptionMessage, SuccessMessage } = require("../utils/constants");
 
 
 // testing
@@ -47,7 +48,7 @@ exports.createCourse = async (req, res) => {
 		) {
 			return res.status(400).json({
 				success: false,
-				message: "All Fields are Mandatory",
+				message: ExceptionMessage.ALL_FIELDS_REQUIRED,
 			});
 		}
 		if (!status || status === undefined) {
@@ -61,7 +62,7 @@ exports.createCourse = async (req, res) => {
 		if (!instructorDetails) {
 			return res.status(404).json({
 				success: false,
-				message: "Instructor Details Not Found",
+				message: ExceptionMessage.INSTRUCTOR_NOT_FOUND,
 			});
 		}
 
@@ -70,7 +71,7 @@ exports.createCourse = async (req, res) => {
 		if (!categoryDetails) {
 			return res.status(404).json({
 				success: false,
-				message: "Category Details Not Found",
+				message: ExceptionMessage.CATEGORY_DETAILS_NOT_FOUND,
 			});
 		}
 		// Upload the Thumbnail to Cloudinary
@@ -119,14 +120,14 @@ exports.createCourse = async (req, res) => {
 		res.status(200).json({
 			success: true,
 			data: newCourse,
-			message: "Course Created Successfully",
+			message: SuccessMessage.COURSE_CREATED,
 		});
 	} catch (error) {
 		// Handle any errors that occur during the creation of the course
 		console.error(error);
 		res.status(500).json({
 			success: false,
-			message: "Failed to create course",
+			message: ExceptionMessage.COURSE_CREATE_FAILED,
 			error: error.message,
 		});
 	}
@@ -143,7 +144,7 @@ exports.editCourse = async (req, res) => {
     const course = await Course.findById(courseId)
 
     if (!course) {
-      return res.status(404).json({ error: "Course not found" })
+      return res.status(404).json({ error: ExceptionMessage.COURSE_NOT_FOUND })
     }
 
     // If Thumbnail Image is found, update it
@@ -191,14 +192,14 @@ exports.editCourse = async (req, res) => {
 
     res.json({
       success: true,
-      message: "Course updated successfully",
+      message: SuccessMessage.COURSE_UPDATED,
       data: updatedCourse,
     })
   } catch (error) {
     console.error(error)
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: ExceptionMessage.INTERNAL_SERVER_ERROR,
       error: error.message,
     })
   }
@@ -227,7 +228,7 @@ exports.getAllCourses = async (req, res) => {
     console.log(e);
     return res.status(500).json({
       success: false,
-      message: "Cannot fetch course data",
+      message: ExceptionMessage.COURSE_FETCH_FAILED,
     })
   }
 }
@@ -258,7 +259,7 @@ exports.getCourseDetails = async (req, res) => {
     if (!courseDetails) {
       return res.status(400).json({
         success: false,
-        message: `Could not find course with id: ${courseId}`,
+        message: ExceptionMessage.COURSE_NOT_FOUND,
       })
     }
 
@@ -315,7 +316,7 @@ exports.getInstructorCourses = async (req, res) => {
     console.error(error)
     res.status(500).json({
       success: false,
-      message: "Failed to retrieve instructor courses",
+      message: ExceptionMessage.INSTRUCTOR_COURSES_FETCH_FAILED,
       error: error.message,
     })
   }
@@ -331,7 +332,7 @@ exports.deleteCourse = async (req, res) => {
     // Find the course
     const course = await Course.findById(courseId)
     if (!course) {
-      return res.status(404).json({ message: "Course not found" })
+      return res.status(404).json({ message: ExceptionMessage.COURSE_NOT_FOUND })
     }
 
     // Unenroll students from the course
@@ -366,13 +367,13 @@ exports.deleteCourse = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Course deleted successfully",
+      message: SuccessMessage.COURSE_DELETED,
     })
   } catch (error) {
     console.error(error)
     return res.status(500).json({
       success: false,
-      message: "Server error",
+      message: ExceptionMessage.INTERNAL_SERVER_ERROR,
       error: error.message,
     })
   }
@@ -413,7 +414,7 @@ exports.getFullCourseDetails = async (req, res) => {
     if (!courseDetails) {
       return res.status(400).json({
         success: false,
-        message: `Could not find course with id: ${courseId}`,
+        message: ExceptionMessage.COURSE_NOT_FOUND,
       })
     }
 

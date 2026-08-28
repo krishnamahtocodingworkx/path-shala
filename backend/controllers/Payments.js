@@ -8,6 +8,7 @@ const CourseProgress = require("../models/CourseProgress")
 const {courseEnrollmentEmail} = require("../mail/templates/courseEnrollmentEmail");
 const {mongoose} = require("mongoose");
 const { response } = require("express");
+const { ExceptionMessage, SuccessMessage } = require("../utils/constants");
 
 
 //initiate the razorpay order
@@ -15,7 +16,7 @@ exports.capturePayment = async (req, res) => {
     const { courses } = req.body
     const userId = req.user.id
     if (courses.length === 0) {
-      return res.json({ success: false, message: "Please Provide Course ID" })
+      return res.json({ success: false, message: ExceptionMessage.COURSE_ID_REQUIRED })
     }
   
     let total_amount = 0
@@ -30,7 +31,7 @@ exports.capturePayment = async (req, res) => {
         if (!course) {
           return res
             .status(200)
-            .json({ success: false, message: "Could not find the Course" })
+            .json({ success: false, message: ExceptionMessage.COURSE_NOT_FOUND })
         }
   
         // Check if the user is already enrolled in the course
@@ -38,7 +39,7 @@ exports.capturePayment = async (req, res) => {
         if (course.studentsEnrolled.includes(uid)) {
           return res
             .status(200)
-            .json({ success: false, message: "Student is already Enrolled" })
+            .json({ success: false, message: ExceptionMessage.STUDENT_ALREADY_ENROLLED })
         }
   
         // Add the price of the course to the total amount
@@ -67,7 +68,7 @@ exports.capturePayment = async (req, res) => {
       console.log(error)
       res
         .status(500)
-        .json({ success: false, message: "Could not initiate order." })
+        .json({ success: false, message: ExceptionMessage.PAYMENT_INITIATION_FAILED })
     }
   }
 
@@ -82,7 +83,7 @@ exports.verifyPayment = async(req, res) => {
     if(!razorpay_order_id ||
         !razorpay_payment_id ||
         !razorpay_signature || !courses || !userId) {
-            return res.status(200).json({success:false, message:"Payment Failed"});
+            return res.status(200).json({success:false, message: ExceptionMessage.PAYMENT_FAILED});
     }
 
     let body = razorpay_order_id + "|" + razorpay_payment_id;
@@ -95,9 +96,9 @@ exports.verifyPayment = async(req, res) => {
             //enroll karwao student ko
             await enrollStudents(courses, userId, res);
             //return res
-            return res.status(200).json({success:true, message:"Payment Verified"});
+            return res.status(200).json({success:true, message: SuccessMessage.PAYMENT_VERIFIED});
         }
-        return res.status(200).json({success:"false", message:"Payment Failed"});
+        return res.status(200).json({success:"false", message: ExceptionMessage.PAYMENT_FAILED});
 
 }
 
@@ -105,7 +106,7 @@ exports.verifyPayment = async(req, res) => {
 const enrollStudents = async(courses, userId, res) => {
 
     if(!courses || !userId) {
-        return res.status(400).json({success:false,message:"Please Provide data for Courses or UserId"});
+        return res.status(400).json({success:false,message: ExceptionMessage.PAYMENT_DATA_REQUIRED});
     }
 
     for(const courseId of courses) {
@@ -118,7 +119,7 @@ const enrollStudents = async(courses, userId, res) => {
         )
 
         if(!enrolledCourse) {
-            return res.status(500).json({success:false,message:"Course not Found"});
+            return res.status(500).json({success:false,message: ExceptionMessage.COURSE_NOT_FOUND});
         }
 
 
@@ -156,7 +157,7 @@ exports.sendPaymentSuccessEmail = async(req, res) => {
     const userId = req.user.id;
 
     if(!orderId || !paymentId || !amount || !userId) {
-        return res.status(400).json({success:false, message:"Please provide all the fields"});
+        return res.status(400).json({success:false, message: ExceptionMessage.ENROLLMENT_FIELDS_REQUIRED});
     }
 
     try{
@@ -171,7 +172,7 @@ exports.sendPaymentSuccessEmail = async(req, res) => {
     }
     catch(error) {
         console.log("error in sending mail", error)
-        return res.status(500).json({success:false, message:"Could not send email"})
+        return res.status(500).json({success:false, message: ExceptionMessage.EMAIL_SEND_FAILED})
     }
 }
 

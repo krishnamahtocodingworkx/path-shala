@@ -1,5 +1,6 @@
 const RatingAndReview = require("../models/RatingAndReview");
 const Course = require("../models/Course");
+const { ExceptionMessage, SuccessMessage } = require("../utils/constants");
 
 //testing
 // createRating,
@@ -19,7 +20,7 @@ exports.createRating = async (req, res) => {
         if (!rating || !review) {
             return res.status(401).json({
                 success: false,
-                message: "All fields are required",
+                message: ExceptionMessage.ALL_FIELDS_REQUIRED,
             })
         }
         console.log("course id is", courseId);
@@ -39,7 +40,7 @@ exports.createRating = async (req, res) => {
         if (!courseDetails) {
             return res.status(404).json({
                 success: false,
-                message: "Student is not enrolled in this course",
+                message: ExceptionMessage.STUDENT_NOT_ENROLLED,
             })
         }
 
@@ -52,7 +53,7 @@ exports.createRating = async (req, res) => {
         if (alreadyReviewed) {
             return res.status(403).json({
                 success: false,
-                message: 'Course is already reviewed by the user',
+                message: ExceptionMessage.COURSE_ALREADY_REVIEWED,
             });
         }
         //create rating and review
@@ -74,7 +75,7 @@ exports.createRating = async (req, res) => {
         //return response
         return res.status(200).json({
             success: true,
-            message: "Rating and Review created Successfully",
+            message: SuccessMessage.RATING_REVIEW_CREATED,
             ratingReview,
         })
 
@@ -127,7 +128,7 @@ exports.getAverageRating = async (req, res) => {
         //if no rating/Review exist
         return res.status(200).json({
             success: true,
-            message: 'Average Rating is 0, no ratings given till now',
+            message: SuccessMessage.AVERAGE_RATING_ZERO,
             averageRating: 0,
         })
     }
@@ -157,7 +158,7 @@ exports.getAllRating = async (req, res) => {
             .exec();
         return res.status(200).json({
             success: true,
-            message: "All reviews fetched successfully",
+            message: SuccessMessage.REVIEWS_FETCHED,
             data: allReviews,
         });
     }

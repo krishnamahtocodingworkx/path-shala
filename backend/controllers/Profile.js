@@ -6,6 +6,7 @@ const User = require("../models/User")
 const { uploadImageToCloudinary } = require("../utils/imageUploader")
 const mongoose = require("mongoose")
 const { convertSecondsToDuration } = require("../utils/secToDuration")
+const { ExceptionMessage, SuccessMessage } = require("../utils/constants");
 
 
 //testing
@@ -46,14 +47,14 @@ exports.updateProfile = async (req,res)=>{
         //send response
         return res.status(200).json({
             success:true,
-            message:"Profile updated successfully",
+            message: SuccessMessage.PROFILE_UPDATED,
            profileDetails,
         })
 
     }catch(error){
         return res.status(500).json({
             success:false,
-            message:"Error while updating Profile",
+            message: ExceptionMessage.PROFILE_UPDATE_FAILED,
         })
     }
 }
@@ -70,7 +71,7 @@ exports.deleteAccount = async(req,res)=>{
         if(!userDetails){
             return res.status(404).json({
                 success:false,
-                message:"User not found",
+                message: ExceptionMessage.USER_NOT_FOUND,
             })
         }
         //delete profile
@@ -82,14 +83,14 @@ exports.deleteAccount = async(req,res)=>{
         //return response
         return res.status(200).json({
             success:true,
-            message:"User Deleted successfully",
+            message: SuccessMessage.ACCOUNT_DELETED,
         })
          
 
     }catch(error){
         res.status(500).json({
             success:false,
-            message:"user cannot deleted successfully",
+            message: ExceptionMessage.USER_DELETE_FAILED,
         })
     }
 }
@@ -109,13 +110,13 @@ exports.getAllUserDetails = async(req,res)=>{
         //return response
         return res.status(200).json({
             success:true,
-            message:"user details fetched successfully"
+            message: SuccessMessage.USER_DETAILS
         })
 
     }catch(error){
         return res.status(500).json({
             success:false,
-            message:"Error occured while fetching user details"
+            message: ExceptionMessage.USER_DETAILS_FETCH_FAILED
         })
     }
 }
@@ -139,7 +140,7 @@ exports.updateDisplayPicture = async (req, res) => {
       )
       res.send({
         success: true,
-        message: `Image Updated successfully`,
+        message: SuccessMessage.IMAGE_UPDATED,
         data: updatedProfile,
       })
     } catch (error) {
@@ -201,7 +202,7 @@ exports.getEnrolledCourses = async (req, res) => {
     if (!userDetails) {
       return res.status(400).json({
         success: false,
-        message: `Could not find user with id: ${userDetails}`,
+        message: ExceptionMessage.USER_NOT_FOUND,
       })
     }
     return res.status(200).json({
@@ -240,7 +241,7 @@ exports.instructorDashboard = async (req, res) => {
       res.status(200).json({ courses: courseData })
     } catch (error) {
       console.error(error)
-      res.status(500).json({ message: "Server Error" })
+      res.status(500).json({ message: ExceptionMessage.INTERNAL_SERVER_ERROR })
     }
 }
 

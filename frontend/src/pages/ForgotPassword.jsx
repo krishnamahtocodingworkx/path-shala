@@ -1,72 +1,72 @@
 import React, { useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { getPasswordResetToken } from "../services/operations/authAPI";
+import AuthPageLayout from "../components/core/Auth/AuthPageLayout";
+import AuthSubmitButton from "../components/core/Auth/AuthSubmitButton";
+
+const inputStyle = {
+  boxShadow: "inset 0px -1px 0px rgba(255, 255, 255, 0.18)",
+};
 
 const ForgotPassword = () => {
   const [emailSent, setEmailSent] = useState(false);
   const [email, setEmail] = useState("");
-
-  const { loading } = useSelector((state) => state.auth);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const dispatch = useDispatch();
 
-  const handleOnSubmit = (event) => {
+  const handleOnSubmit = async (event) => {
     event.preventDefault();
-    dispatch(getPasswordResetToken(email, setEmailSent));
+    setIsSubmitting(true);
+    try {
+      await dispatch(getPasswordResetToken(email, setEmailSent));
+    } catch (error) {
+      // Error toast is handled in authAPI
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white px-4">
-      {loading ? (
-        <div className="flex justify-center items-center h-full">
-          <span className="animate-spin w-8 h-8 border-4 border-t-transparent border-white rounded-full"></span>
-        </div>
-      ) : (
-        <div className="w-full max-w-md bg-gray-800 p-6 rounded-lg shadow-lg">
-          <h1 className="text-2xl font-semibold text-center mb-4">
-            {emailSent ? "Check Your Email" : "Reset Your Password"}
-          </h1>
+    <AuthPageLayout
+      title={emailSent ? "Check your email" : "Reset your password"}
+      description={
+        emailSent
+          ? `We've sent a password reset link to ${email}. Please check your inbox.`
+          : "Enter your email address and we'll send you a link to reset your password."
+      }
+    >
+      <form onSubmit={handleOnSubmit} className="flex flex-col gap-y-4">
+        {!emailSent && (
+          <label className="w-full">
+            <p className="mb-1 text-[0.875rem] leading-[1.375rem] text-richblack-5">
+              Email Address <sup className="text-pink-200">*</sup>
+            </p>
+            <input
+              required
+              type="email"
+              name="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email address"
+              disabled={isSubmitting}
+              style={inputStyle}
+              className="w-full rounded-[0.5rem] bg-richblack-800 p-[12px] text-richblack-5 disabled:opacity-70"
+            />
+          </label>
+        )}
 
-          <p className="text-gray-400 text-center mb-6">
-            {emailSent
-              ? `We've sent a password reset link to ${email}. Check your inbox.`
-              : "Enter your email address below to receive a password reset link."}
-          </p>
+        <AuthSubmitButton isSubmitting={isSubmitting}>
+          {emailSent ? "Resend Email" : "Reset Password"}
+        </AuthSubmitButton>
+      </form>
 
-          <form onSubmit={handleOnSubmit} className="space-y-4">
-            {!emailSent && (
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
-                  Email Address *
-                </label>
-                <input
-                  required
-                  type="email"
-                  name="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email address"
-                  className="w-full px-3 py-2 rounded-lg border border-gray-600 bg-gray-700 text-richblack-900 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-              </div>
-            )}
-
-            <button
-              type="submit"
-              className="w-full py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-semibold transition duration-200"
-            >
-              {emailSent ? "Resend Email" : "Reset Password"}
-            </button>
-          </form>
-
-          <div className="mt-4 text-center">
-            <Link to="/login" className="text-blue-400 hover:underline">
-              Back to Login
-            </Link>
-          </div>
-        </div>
-      )}
-    </div>
+      <div className="mt-4 text-center">
+        <Link to="/login" className="text-sm text-blue-100 hover:underline">
+          Back to Login
+        </Link>
+      </div>
+    </AuthPageLayout>
   );
 };
 

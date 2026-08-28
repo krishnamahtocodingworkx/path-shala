@@ -2,6 +2,7 @@ const User = require("../models/User");
 const mailSender = require("../utils/mailSender");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
+const { ExceptionMessage, SuccessMessage } = require("../utils/constants");
 //resetPasswordToken
 
 
@@ -10,14 +11,20 @@ exports.resetPasswordToken = async (req,res)=>{
 
 
     try{
-            //get email from req body
     const email = req.body.email;
-    //check user for this email
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: ExceptionMessage.ALL_FIELDS_REQUIRED,
+      });
+    }
+
     const user = await User.findOne({email:email});
     if(!user){
         return res.status(401).json({
             success:false,
-            message:"your email is not registred with us",
+            message: ExceptionMessage.EMAIL_NOT_EXISTS,
         })
     }
 
@@ -38,21 +45,21 @@ exports.resetPasswordToken = async (req,res)=>{
         console.log("updatedDEtails is",updatedDetails)
     //create url
 
-    const url = `https://path-shala-omega.vercel.app/update-password/${token}`
+    const url = `${process.env.FRONTEND_URL || "http://localhost:3000"}/update-password/${token}`
 
     //send mail containing the url
     await mailSender(email,"Password reset link",`Password Reset Link ${url}`);
     //return response
     return res.status(200).json({
         success:true,
-        message:"message sent successfully,please check your email",
+        message: SuccessMessage.PASSWORD_RESET_EMAIL_SENT,
     })
 
     }catch(e){
         console.log(e);
         return res.status(500).json({
             success:false,
-            message:"Something went wrong,while reset password",
+            message: ExceptionMessage.SOMETHING_WENT_WRONG,
         })
     }
 }
@@ -62,52 +69,64 @@ exports.resetPasswordToken = async (req,res)=>{
 exports.resetPassword = async(req,res)=>{
     try{
 
-        //fetch data
         const {password,confirmPassword,token} = req.body;
-        //validation
+
+        if (!password || !confirmPassword || !token) {
+            return res.status(400).json({
+                success: false,
+                message: ExceptionMessage.ALL_FIELDS_REQUIRED,
+            });
+        }
 
         if(password !== confirmPassword){
-            return res.status(401).json({
+            return res.status(400).json({
                 success:false,
-                message:"Password and confirm password is not matched"
+                message: ExceptionMessage.PASSWORD_MISMATCH
             })
         }
 
-        //get userdetails from db using token
+        if (password.length < 6) {
+            return res.status(400).json({
+                success: false,
+                message: ExceptionMessage.PASSWORD_TOO_SHORT,
+            });
+        }
+
         const userDetails = await User.findOne({token:token});
-        //if no entry - invalid token
         if(!userDetails){
-            console.log(userDetails);
-            return res.json({
+            return res.status(400).json({
                 success:false,
-                message:"Token is Invalid",
+                message: ExceptionMessage.PASSWORD_RESET_TOKEN_INVALID,
             })
         }
-        //token time check
-        if(userDetails.resetPasswordExpires <Date.now() ){
-            return res.json({
-                succes:false,
-                message:"Time is gone to change password"
+
+        if(userDetails.resetPasswordExpires < Date.now()){
+            return res.status(400).json({
+                success:false,
+                message: ExceptionMessage.PASSWORD_RESET_TOKEN_EXPIRED
             })
         }
-        //hash password
+
         const hashedPassword = await bcrypt.hash(password,10);
-        //update password
         await User.findOneAndUpdate(
             {token:token},
-            {password:hashedPassword},
+            {
+                password: hashedPassword,
+                token: undefined,
+                resetPasswordExpires: undefined,
+            },
             {new:true},
         )
-        //return response
+
         return res.status(200).json({
             success:true,
-            message:"Password reset successfully"
+            message: SuccessMessage.RESET_PASSWORD_SUCCESS
         })
     }catch(e){
         console.log(e);
         return res.status(500).json({
             success:false,
-            message:"Error occurred while reset the password"
+            message: ExceptionMessage.PASSWORD_RESET_FAILED
         })
     }
 }

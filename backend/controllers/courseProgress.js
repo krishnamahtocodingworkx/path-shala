@@ -3,6 +3,7 @@ const Section = require("../models/Section")
 const SubSection = require("../models/SubSection")
 const CourseProgress = require("../models/CourseProgress")
 const Course = require("../models/Course")
+const { ExceptionMessage, SuccessMessage } = require("../utils/constants");
 
 exports.updateCourseProgress = async (req, res) => {
   const { courseId, subsectionId } = req.body
@@ -12,7 +13,7 @@ exports.updateCourseProgress = async (req, res) => {
     // Check if the subsection is valid
     const subsection = await SubSection.findById(subsectionId)
     if (!subsection) {
-      return res.status(404).json({ error: "Invalid subsection" })
+      return res.status(404).json({ error: ExceptionMessage.INVALID_SUBSECTION })
     }
 
     // Find the course progress document for the user and course
@@ -25,12 +26,12 @@ exports.updateCourseProgress = async (req, res) => {
       // If course progress doesn't exist, create a new one
       return res.status(404).json({
         success: false,
-        message: "Course progress Does Not Exist",
+        message: ExceptionMessage.COURSE_PROGRESS_NOT_FOUND,
       })
     } else {
       // If course progress exists, check if the subsection is already completed
       if (courseProgress.completedVideos.includes(subsectionId)) {
-        return res.status(400).json({ error: "Subsection already completed" })
+        return res.status(400).json({ error: ExceptionMessage.SUBSECTION_ALREADY_COMPLETED })
       }
 
       // Push the subsection into the completedVideos array
@@ -40,10 +41,10 @@ exports.updateCourseProgress = async (req, res) => {
     // Save the updated course progress
     await courseProgress.save()
 
-    return res.status(200).json({ message: "Course progress updated" })
+    return res.status(200).json({ message: SuccessMessage.COURSE_PROGRESS_UPDATED })
   } catch (error) {
     console.error(error)
-    return res.status(500).json({ error: "Internal server error" })
+    return res.status(500).json({ error: ExceptionMessage.INTERNAL_SERVER_ERROR })
   }
 }
 
