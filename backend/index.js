@@ -27,7 +27,7 @@ app.use(cookieParser());
 //deployment me hmessa origin * hoga yaad rkhna hai ye
 app.use(
     cors({
-        origin:"*",
+        origin:process.env.FRONTEND_URL,
         credentials: true,
     })
 )
