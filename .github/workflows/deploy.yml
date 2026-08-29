@@ -1,0 +1,43 @@
+name: Deploy PathShala Backend
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+
+          script: |
+            cd ~/path-shala
+
+            git pull origin main
+
+            cd backend
+
+            docker build -t pathshala-backend .
+
+            docker stop pathshala-backend || true
+            docker rm pathshala-backend || true
+
+            docker run -d \
+              --name pathshala-backend \
+              --restart unless-stopped \
+              -p 127.0.0.1:4000:4000 \
+              --env-file .env \
+              pathshala-backend
+
+            sleep 5
+
+            docker ps
+
+            curl -f http://localhost:4000/
