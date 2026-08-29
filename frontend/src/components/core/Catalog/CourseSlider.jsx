@@ -1,48 +1,55 @@
-import React from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import "swiper/css";
-import "swiper/css/pagination";
-import "swiper/css/free-mode";
-import { Autoplay, FreeMode, Navigation, Pagination } from "swiper/modules";
-import Course_Cart from "./Course_Card";
+import React from "react"
+import { Swiper, SwiperSlide } from "swiper/react"
+import "swiper/css"
+import "swiper/css/pagination"
+import "swiper/css/free-mode"
+import { Autoplay, FreeMode, Pagination } from "swiper/modules"
+
+import CourseCard from "./Course_Card"
+
 const CourseSlider = ({ Courses }) => {
-  return (
-    <>
-      {console.log(Courses)}
+  const courses = Courses?.filter(Boolean) || []
 
-      {Courses?.length ? (
-        <div className="w-11/12 max-w-maxContent mx-auto mt-6">
-          <Swiper
-            slidesPerView={1}
-            spaceBetween={24}
-            loop={true}
-            freeMode={true}
-            autoplay={{
-              delay: 2500,
-            }}
-            modules={[FreeMode, Pagination, Autoplay]}
-            breakpoints={{
-              1024: { slidesPerView: 3 },
-            }}
-            className="pb-8"
-          >
-            {Courses.map((course, index) => (
-              <SwiperSlide
-                key={index}
-                className="transition-transform hover:scale-105 duration-300"
-              >
-                <Course_Cart course={course} Height={"h-[250px]"} />
-              </SwiperSlide>
-            ))}
-          </Swiper>
-        </div>
-      ) : (
-        <p className="text-center text-xl text-richblack-200 mt-10">
-          No Courses Found
+  if (!courses.length) {
+    return (
+      <div className="rounded-xl border border-dashed border-richblack-600 bg-richblack-800 px-6 py-16 text-center">
+        <p className="text-xl font-medium text-richblack-5">No courses found</p>
+        <p className="mt-2 text-sm text-richblack-300">
+          Published courses in this category will appear here.
         </p>
-      )}
-    </>
-  );
-};
+      </div>
+    )
+  }
 
-export default CourseSlider;
+  return (
+    <Swiper
+      slidesPerView={1}
+      spaceBetween={24}
+      loop={courses.length > 3}
+      freeMode={true}
+      pagination={{ clickable: true }}
+      autoplay={
+        courses.length > 1
+          ? {
+              delay: 2800,
+              disableOnInteraction: false,
+            }
+          : false
+      }
+      modules={[FreeMode, Pagination, Autoplay]}
+      breakpoints={{
+        640: { slidesPerView: 2 },
+        1024: { slidesPerView: 3 },
+      }}
+      className="pb-12"
+    >
+      {courses.map((course) => (
+        <SwiperSlide key={course._id}>
+          <CourseCard course={course} Height="h-[220px]" />
+        </SwiperSlide>
+      ))}
+    </Swiper>
+  )
+}
+
+export default CourseSlider

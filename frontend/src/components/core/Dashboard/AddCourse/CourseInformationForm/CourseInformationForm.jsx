@@ -291,7 +291,7 @@ export default function CourseInformationForm() {
       <button
         type="button"
         onClick={() => setShowAddCategory(true)}
-        className="self-start text-sm font-medium text-yellow-400 hover:text-yellow-300"
+        className="self-start text-sm font-medium text-yellow-50 hover:text-yellow-100"
       >
         Can&apos;t find a category? Add new
       </button>

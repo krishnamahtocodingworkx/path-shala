@@ -1,56 +1,59 @@
-import React from "react";
-import RatingStars from "../../common/RatingStars";
-import { Link } from "react-router-dom";
-import GetAvgRating from "../../../utils/avgRating";
-import { useState, useEffect } from "react";
+import React from "react"
+import { Link } from "react-router-dom"
+import { useEffect, useState } from "react"
+
+import RatingStars from "../../common/RatingStars"
+import GetAvgRating from "../../../utils/avgRating"
+
 const Course_Card = ({ course, Height }) => {
-  const [avgRaviewCount, setAvgReviewCount] = useState(0);
+  const [avgReviewCount, setAvgReviewCount] = useState(0)
 
   useEffect(() => {
-    const count = GetAvgRating(course.ratingAndReview);
-    setAvgReviewCount(count);
-  }, [course]);
+    const ratings = course?.ratingAndReviews || course?.ratingAndReview || []
+    setAvgReviewCount(GetAvgRating(ratings))
+  }, [course])
+
+  if (!course?._id) return null
+
+  const ratings = course?.ratingAndReviews || course?.ratingAndReview || []
+  const instructorName = [course?.instructor?.firstName, course?.instructor?.lastName]
+    .filter(Boolean)
+    .join(" ")
+
   return (
-    <div className="transition-transform duration-300 hover:scale-105">
-      <Link to={`/courses/${course._id}`} className="block">
-        <div className="flex flex-col gap-3 bg-richblack-800 p-4 rounded-xl shadow-lg">
-          {/* Course Image */}
-          <div className="relative w-full overflow-hidden rounded-xl">
-            <img
-              src={course?.thumbnail}
-              alt="Course Thumbnail"
-              className={`w-full rounded-xl object-cover ${Height}`}
-            />
-          </div>
-
-          {/* Course Details */}
-          <div className="flex flex-col gap-2 text-white">
-            <p className="text-lg font-semibold">{course?.courseName}</p>
-
-            <p className="text-sm text-richblack-200">
-              {course?.instructor?.firstName} {course?.instructor?.lastName}
-            </p>
-
-            {/* Ratings & Reviews */}
-            <div className="flex items-center gap-2">
-              <span className="text-yellow-50 font-bold">
-                {avgRaviewCount || 0}
-              </span>
-              <RatingStars Review_Count={avgRaviewCount} />
-              <span className="text-richblack-200 text-sm">
-                {course?.ratingAndReview?.length} Ratings
-              </span>
-            </div>
-
-            {/* Price */}
-            <p className="text-lg font-semibold text-yellow-50">
-              ${course?.price}
-            </p>
-          </div>
+    <Link to={`/courses/${course._id}`} className="block h-full">
+      <article className="flex h-full flex-col overflow-hidden rounded-xl border border-richblack-700 bg-richblack-800 shadow-lg transition duration-300 hover:-translate-y-1 hover:border-yellow-50/40">
+        <div className={`w-full overflow-hidden ${Height || "h-[200px]"}`}>
+          <img
+            src={course?.thumbnail}
+            alt={course?.courseName || "Course thumbnail"}
+            className="h-full w-full object-cover"
+          />
         </div>
-      </Link>
-    </div>
-  );
-};
 
-export default Course_Card;
+        <div className="flex flex-1 flex-col gap-2 p-4 text-white">
+          <p className="max-h-14 overflow-hidden text-lg font-semibold">
+            {course?.courseName}
+          </p>
+          <p className="text-sm text-richblack-300">
+            {instructorName || "PathShala Instructor"}
+          </p>
+
+          <div className="mt-auto flex flex-wrap items-center gap-2">
+            <span className="font-bold text-yellow-50">{avgReviewCount || 0}</span>
+            <RatingStars Review_Count={avgReviewCount} Star_Size={18} />
+            <span className="text-sm text-richblack-300">
+              ({ratings.length} {ratings.length === 1 ? "rating" : "ratings"})
+            </span>
+          </div>
+
+          <p className="text-lg font-semibold text-yellow-50">
+            ₹ {course?.price ?? 0}
+          </p>
+        </div>
+      </article>
+    </Link>
+  )
+}
+
+export default Course_Card

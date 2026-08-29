@@ -5,6 +5,7 @@ const Section = require("../models/Section")
 const SubSection = require("../models/SubSection")
 const { uploadImageToCloudinary } = require("../utils/imageUploader");
 const CourseProgress = require("../models/CourseProgress")
+require("../models/RatingAndReview")
 const { convertSecondsToDuration } = require("../utils/secToDuration")
 const { ExceptionMessage, SuccessMessage } = require("../utils/constants");
 
@@ -246,7 +247,7 @@ exports.getCourseDetails = async (req, res) => {
         },
       })
       .populate("category")
-      // .populate("ratingAndReviews")
+      .populate("ratingAndReviews")
       .populate({
         path: "courseContent",
         populate: {

@@ -42,7 +42,7 @@ function App() {
         <Route path="/update-password/:id" element={<UpdatePassword />}></Route>
         <Route path="/verify-email" element={<VerifyEmail />}></Route>
 
-        <Route path="/About" element={<About />}></Route>
+        <Route path="/about" element={<About />}></Route>
         <Route path="/contact" element={<Contact />}></Route>
 
         <Route
