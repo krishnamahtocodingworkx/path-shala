@@ -146,12 +146,7 @@ const Home = () => {
 
       <section className="mx-auto flex w-11/12 max-w-maxContent flex-col gap-14 bg-richblack-900 py-16 text-white">
         <InstructorSection />
-        <div>
-          <h2 className="mb-8 text-center text-3xl font-semibold md:text-4xl">
-            Reviews from other learners
-          </h2>
-          <ReviewSlider />
-        </div>
+        <ReviewSlider />
       </section>
 
       <Footer />

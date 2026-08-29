@@ -14,12 +14,13 @@ const IconBtn = ({
       disabled={disabled}
       onClick={onClick}
       type={type}
-      className={`cursor-pointer rounded-md py-[8px] px-[20px] font-semibold transition duration-200 
-    ${
-      disabled
-        ? "bg-gray-500 text-gray-300 cursor-not-allowed"
-        : "bg-yellow-600 text-white hover:bg-yellow-700"
-    }`}
+      className={`cursor-pointer rounded-md py-[8px] px-[20px] font-semibold transition duration-200 ${
+        disabled
+          ? "cursor-not-allowed bg-gray-500 text-gray-300"
+          : outline
+          ? "border border-yellow-50 bg-transparent text-yellow-50 hover:bg-yellow-50 hover:text-richblack-900"
+          : "bg-yellow-50 text-richblack-900 hover:bg-yellow-100"
+      } ${customClasses || ""}`}
     >
       {children ? (
         <span className="flex items-center gap-x-2">

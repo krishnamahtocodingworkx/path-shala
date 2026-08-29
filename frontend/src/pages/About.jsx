@@ -123,9 +123,6 @@ const About = () => {
       </section>
 
       <section className="mx-auto w-11/12 max-w-maxContent pb-16">
-        <h2 className="mb-8 text-center text-3xl font-semibold md:text-4xl">
-          Reviews from other learners
-        </h2>
         <ReviewSlider />
       </section>
 

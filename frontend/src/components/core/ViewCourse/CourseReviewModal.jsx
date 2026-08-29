@@ -1,237 +1,184 @@
-// import React, { useEffect } from 'react'
-// import { useForm } from 'react-hook-form';
-// import { useSelector } from 'react-redux'
-// import IconBtn from '../../common/IconBtn';
-// import { createRating } from '../../../services/operations/courseDetailsAPI';
-// import ReactStars from 'react-stars'
+import React, { useEffect, useRef, useState } from "react"
+import { createPortal } from "react-dom"
+import { useSelector } from "react-redux"
+import { FaStar } from "react-icons/fa"
+import { RxCross2 } from "react-icons/rx"
 
-
-// const CourseReviewModal = ({setReviewModal}) => {
-//     const {user} = useSelector((state)=>state.profile);
-//     const {token} = useSelector((state) => state.auth);
-//     const {courseEntireData} = useSelector((state)=> state.viewCourse);
-
-//     const {
-//         register,
-//         handleSubmit,
-//         setValue,
-//         formState: {errors},
-//     } = useForm();
-
-//     useEffect(()=> {
-//         setValue("courseExperience", "");
-//         setValue("courseRating", 0);
-//     },[])
-
-//     const ratingChanged = (newRating) => {
-//         setValue("courseRating", newRating);
-//     }
-
-//     const onSubmit = async(data) => {
-//         await createRating(
-//             {
-//                 courseId:courseEntireData._id,
-//                 rating:data.courseRating,
-//                 review:data.courseExperience,
-//             },
-//             token
-//         );
-//         setReviewModal(false);
-//     }
-
-//   return (
-//     <div className='text-white'>
-//         <div>
-//             {/* Modal header */}
-//             <div>
-//                 <p>Add Review</p>
-//                 <button 
-//                 onClick={()=>setReviewModal(false)}
-//                 >
-//                     Close
-//                 </button>
-//             </div>
-
-//             {/* Modal Body */}
-//             <div>
-
-//                 <div>
-//                     <img 
-//                         src={user?.image}
-//                         alt='user Image'
-//                         className='aspect-square  w-[50px] rounded-full object-cover'
-//                     />
-//                     <div>
-//                         <p>{user?.firstName} {user?.lastName}</p>
-//                         <p>Posting Publicly</p>
-//                     </div>
-//                 </div>
-
-
-//                 <form
-//                 onSubmit={handleSubmit(onSubmit)}
-//                 className='mt-6 flex flex-col items-center'>
-
-//                     <ReactStars 
-//                         count={5}
-//                         onChange={ratingChanged}
-//                         size={24}
-//                         activeColor="#ffd700"
-//                     />
-
-//                     <div>
-//                         <label htmlFor='courseExperience'>
-//                             Add Your Experience*
-//                         </label>
-//                         <textarea 
-//                             id='courseExperience'
-//                             placeholder='Add Your Experience here'
-//                             {...register("courseExperience", {required:true})}
-//                             className='form-style min-h-[130px] w-full'
-//                         />
-//                         {
-//                             errors.courseExperience && (
-//                                 <span>
-//                                     Please add your experience
-//                                 </span>
-//                             )
-//                         }
-//                     </div>
-//                     {/* Cancel and Save button */}
-//                     <div>
-//                         <button
-//                         onClick={() => setReviewModal(false)}
-//                         >
-//                             Cancel
-//                         </button>
-//                         <IconBtn 
-//                             text="save"
-//                         />
-//                     </div>
-
-
-//                 </form>
-
-//             </div>
-//         </div>
-//     </div>
-//   )
-// }
-
-// export default CourseReviewModal
-
-
-import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { useSelector } from 'react-redux';
-import IconBtn from '../../common/IconBtn';
-import { createRating } from '../../../services/operations/courseDetailsAPI';
-import ReactStars from 'react-stars';
+import { createRating } from "../../../services/operations/courseDetailsAPI"
 
 const CourseReviewModal = ({ setReviewModal }) => {
-    const { user } = useSelector((state) => state.profile);
-    const { token } = useSelector((state) => state.auth);
-    const { courseEntireData } = useSelector((state) => state.viewCourse);
+  const { user } = useSelector((state) => state.profile)
+  const { token } = useSelector((state) => state.auth)
+  const { courseEntireData } = useSelector((state) => state.viewCourse)
+  const [rating, setRating] = useState(0)
+  const [hoverRating, setHoverRating] = useState(0)
+  const [review, setReview] = useState("")
+  const [submitting, setSubmitting] = useState(false)
+  const [errors, setErrors] = useState({})
+  const textareaRef = useRef(null)
 
-    const {
-        register,
-        handleSubmit,
-        setValue,
-        formState: { errors },
-    } = useForm();
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    const timer = setTimeout(() => textareaRef.current?.focus(), 50)
 
-    useEffect(() => {
-        setValue("courseExperience", "");
-        setValue("courseRating", 0);
-    }, []);
+    // video-react listens on document for Space (play/pause) and calls preventDefault.
+    // Stop those keys on the field itself so they never reach the player.
+    const stopPlayerShortcuts = (event) => event.stopPropagation()
+    const field = textareaRef.current
+    field?.addEventListener("keydown", stopPlayerShortcuts)
+    field?.addEventListener("keyup", stopPlayerShortcuts)
 
-    const ratingChanged = (newRating) => {
-        setValue("courseRating", newRating);
-    };
+    return () => {
+      document.body.style.overflow = previousOverflow
+      clearTimeout(timer)
+      field?.removeEventListener("keydown", stopPlayerShortcuts)
+      field?.removeEventListener("keyup", stopPlayerShortcuts)
+    }
+  }, [])
 
-    const onSubmit = async (data) => {
-        await createRating(
-            {
-                courseId: courseEntireData._id,
-                rating: data.courseRating,
-                review: data.courseExperience,
-            },
-            token
-        );
-        setReviewModal(false);
-    };
+  const onSubmit = async (event) => {
+    event.preventDefault()
+    const nextErrors = {}
+    if (!rating) nextErrors.rating = "Please select a rating"
+    if (!review.trim()) nextErrors.review = "Please add your experience"
+    setErrors(nextErrors)
+    if (Object.keys(nextErrors).length) return
 
-    return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-richblack-800 p-6 rounded-lg w-[90%] max-w-md shadow-lg">
-                {/* Modal header */}
-                <div className="flex justify-between items-center border-b border-richblack-600 pb-3 mb-4">
-                    <p className="text-lg font-semibold text-white">Add Review</p>
-                    <button 
-                        onClick={() => setReviewModal(false)}
-                        className="text-richblack-300 hover:text-red-500 transition"
-                    >
-                        Close
-                    </button>
-                </div>
+    setSubmitting(true)
+    const success = await createRating(
+      {
+        courseId: courseEntireData._id,
+        rating,
+        review: review.trim(),
+      },
+      token
+    )
+    setSubmitting(false)
+    if (success) setReviewModal(false)
+  }
 
-                {/* Modal Body */}
-                <div className="space-y-4">
-                    <div className="flex items-center space-x-3">
-                        <img 
-                            src={user?.image}
-                            alt={`Profile of ${user?.firstName}`}
-                            className='w-12 h-12 rounded-full object-cover border border-richblack-600'
-                        />
-                        <div>
-                            <p className="text-white font-medium">{user?.firstName} {user?.lastName}</p>
-                            <p className="text-xs text-richblack-400">Posting Publicly</p>
-                        </div>
-                    </div>
-
-                    <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col space-y-4'>
-                        <ReactStars 
-                            count={5}
-                            onChange={ratingChanged}
-                            size={28}
-                            color2="#ffd700"
-                        />
-
-                        <div>
-                            <label htmlFor='courseExperience' className="block text-sm text-richblack-300 mb-1">
-                                Add Your Experience*
-                            </label>
-                            <textarea 
-                                id='courseExperience'
-                                placeholder='Share your thoughts...'
-                                {...register("courseExperience", { required: true })}
-                                className='w-full p-2 border border-richblack-600 rounded-lg bg-richblack-700 text-white focus:outline-none focus:ring-2 focus:ring-yellow-500'
-                            />
-                            {errors.courseExperience && (
-                                <span className="text-red-400 text-xs">Please add your experience</span>
-                            )}
-                        </div>
-
-                        {/* Cancel and Save button */}
-                        <div className="flex justify-end space-x-3">
-                            <button
-                                type="button"
-                                onClick={() => setReviewModal(false)}
-                                className="px-4 py-2 text-richblack-300 hover:text-white border border-richblack-600 rounded-md transition"
-                            >
-                                Cancel
-                            </button>
-                            <IconBtn 
-                                text="Save"
-                                type="submit"
-                                className="px-4 py-2 bg-yellow-500 text-richblack-900 rounded-md hover:bg-yellow-600 transition"
-                            />
-                        </div>
-                    </form>
-                </div>
-            </div>
+  const modal = (
+    <div
+      className="fixed inset-0 z-[10000] grid place-items-center overflow-auto bg-richblack-900/60 p-4 backdrop-blur-sm"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) setReviewModal(false)
+      }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="review-modal-title"
+        className="pointer-events-auto my-6 w-full max-w-[500px] rounded-xl border border-richblack-400 bg-richblack-800 p-6 shadow-2xl"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <div className="flex items-center justify-between border-b border-richblack-600 pb-4">
+          <p id="review-modal-title" className="text-xl font-semibold text-richblack-5">
+            Add a review
+          </p>
+          <button
+            type="button"
+            onClick={() => setReviewModal(false)}
+            className="text-richblack-300 transition hover:text-pink-200"
+            aria-label="Close review modal"
+          >
+            <RxCross2 size={22} />
+          </button>
         </div>
-    );
-};
 
-export default CourseReviewModal;
+        <div className="mt-6 flex items-center gap-3">
+          <img
+            src={user?.image}
+            alt={user?.firstName}
+            className="h-12 w-12 rounded-full object-cover"
+          />
+          <div>
+            <p className="font-medium text-richblack-5">
+              {user?.firstName} {user?.lastName}
+            </p>
+            <p className="text-xs text-richblack-300">Posting publicly</p>
+          </div>
+        </div>
+
+        <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-5">
+          <div className="flex flex-col items-center">
+            <div className="flex items-center gap-1" role="radiogroup" aria-label="Course rating">
+              {[1, 2, 3, 4, 5].map((star) => {
+                const active = (hoverRating || rating) >= star
+                return (
+                  <button
+                    key={star}
+                    type="button"
+                    aria-label={`${star} star${star > 1 ? "s" : ""}`}
+                    onMouseEnter={() => setHoverRating(star)}
+                    onMouseLeave={() => setHoverRating(0)}
+                    onClick={() => {
+                      setRating(star)
+                      setErrors((prev) => ({ ...prev, rating: undefined }))
+                    }}
+                    className="p-1"
+                  >
+                    <FaStar
+                      size={28}
+                      className={active ? "text-yellow-50" : "text-richblack-400"}
+                    />
+                  </button>
+                )
+              })}
+            </div>
+            {errors.rating && (
+              <span className="mt-1 text-xs text-pink-200">{errors.rating}</span>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label htmlFor="courseExperience" className="text-sm text-richblack-5">
+              Add your experience <sup className="text-pink-200">*</sup>
+            </label>
+            <textarea
+              ref={textareaRef}
+              id="courseExperience"
+              name="courseExperience"
+              rows={5}
+              value={review}
+              onChange={(event) => {
+                setReview(event.target.value)
+                setErrors((prev) => ({ ...prev, review: undefined }))
+              }}
+              onKeyDown={(event) => {
+                event.stopPropagation()
+                event.nativeEvent.stopImmediatePropagation()
+              }}
+              placeholder="Share what you liked, learned, or would improve..."
+              className="resize-none rounded-lg border border-richblack-600 bg-richblack-700 p-3 text-richblack-5 outline-none placeholder:text-richblack-400 focus:border-yellow-50"
+            />
+            {errors.review && (
+              <span className="text-xs text-pink-200">{errors.review}</span>
+            )}
+          </div>
+
+          <div className="flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => setReviewModal(false)}
+              className="rounded-md bg-richblack-700 px-5 py-2 font-semibold text-richblack-5 transition hover:bg-richblack-600"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="rounded-md bg-yellow-50 px-5 py-2 font-semibold text-richblack-900 transition hover:bg-yellow-100 disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {submitting ? "Saving..." : "Save"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+
+  return createPortal(modal, document.body)
+}
+
+export default CourseReviewModal

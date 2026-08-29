@@ -11,6 +11,28 @@
   background: #ffd60a;
 }
 
+.review-swiper .swiper-pagination-bullet {
+  width: 8px;
+  height: 8px;
+  background: #6e727f;
+  opacity: 1;
+}
+
+.review-swiper .swiper-pagination-bullet-active {
+  width: 22px;
+  border-radius: 9999px;
+  background: #ffd60a;
+}
+
+.review-swiper .swiper-wrapper {
+  align-items: stretch;
+}
+
+.review-swiper .swiper-slide {
+  height: auto;
+  display: flex;
+}
+
 @keyframes shimmer {
   100% {
     transform: translateX(100%);
@@ -39,4 +61,16 @@
     transparent
   );
   animation: shimmer 1.4s infinite;
+}
+
+.video-react {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.video-react .video-react-big-play-button {
+  border-radius: 9999px !important;
+  border: none !important;
+  background-color: #ffd60a !important;
+  color: #000814 !important;
 }

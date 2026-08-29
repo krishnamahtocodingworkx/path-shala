@@ -329,9 +329,6 @@ const CourseDetails = () => {
               </section>
 
               <section className="pb-6">
-                <h2 className="mb-6 text-center text-2xl font-semibold text-richblack-5 md:text-3xl">
-                  Reviews from other learners
-                </h2>
                 <ReviewSlider />
               </section>
             </div>
