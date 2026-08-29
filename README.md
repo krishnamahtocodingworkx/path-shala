@@ -1,6 +1,6 @@
 # PathShala
 
-PathShala is a full-stack online learning platform (EdTech). Students browse and buy courses, instructors create and publish video courses, and admins manage categories.
+PathShala is a full-stack online learning platform. Students browse and buy courses, instructors create and publish video courses (and categories), and admins can also manage categories.
 
 It was built as an ITS college project. Live deployments:
 
@@ -35,20 +35,22 @@ It was built as an ITS college project. Live deployments:
 
 ## What this product does
 
-PathShala is a course marketplace with three sides:
+PathShala is a course marketplace with three sides.
 
 **Students**
 
 - Sign up / log in with email OTP verification
-- Browse courses by category (Catalog)
-- View course details, ratings, and instructor info
+- Browse courses by category (Catalog) with Most Popular / New tabs
+- View course details, ratings, instructor info, and a sticky buy card
 - Add courses to a cart and pay with Razorpay
-- Watch enrolled lectures, track progress, and leave ratings
+- Watch enrolled lectures, track progress, mark lectures complete
+- Leave a star rating and written review
 - Update profile, avatar, and password
 
 **Instructors**
 
 - Create courses in a 3-step wizard (info → curriculum → publish)
+- Create a **new category** from the course-info step if it is missing
 - Upload a thumbnail and lecture videos (Cloudinary)
 - Organize content as Course → Section → SubSection (lecture)
 - Edit / delete courses, sections, and lectures
@@ -56,10 +58,11 @@ PathShala is a course marketplace with three sides:
 
 **Admins**
 
-- Create course categories (`POST /api/v1/course/createCategory`)
+- Can also create categories (`POST /api/v1/course/createCategory`)
+- There is **no Admin UI**; signup only offers Student or Instructor
 - Categories power the navbar Catalog dropdown and catalog pages
 
-Also included: contact form emails, password reset via email, a homepage help chatbot (rule-based), and a review slider on public pages.
+Also included: contact form emails, password reset via email, a homepage help chatbot (rule-based), and a review slider on Home, About, Contact, and course details.
 
 ---
 
@@ -70,12 +73,12 @@ Also included: contact form emails, password reset via email, a homepage help ch
 | Piece | Choice |
 | --- | --- |
 | UI | React 18 (Create React App / `react-scripts`) |
-| Styling | Tailwind CSS 3, custom `richblack` / `yellow` palette |
+| Styling | Tailwind CSS 3, custom `richblack` / `yellow` palette, shimmer skeletons |
 | Routing | React Router DOM 6 |
 | State | Redux Toolkit (`auth`, `profile`, `cart`, `course`, `viewCourse`) |
 | HTTP | Axios (`src/services/apiconnector.js`) |
-| Forms | react-hook-form (contact / some forms) |
-| Payments | Razorpay Checkout JS |
+| Forms | react-hook-form (contact / some dashboard forms) |
+| Payments | Razorpay Checkout JS (`REACT_APP_RAZORPAY_KEY`) |
 | Charts | Chart.js + react-chartjs-2 |
 | Video | video-react |
 | Toasts | react-hot-toast |
@@ -93,6 +96,7 @@ Also included: contact form emails, password reset via email, a homepage help ch
 | Payments | Razorpay Node SDK |
 | Email | Nodemailer (Gmail SMTP, port 465) |
 | OTP | `otp-generator`, stored in MongoDB (TTL 5 min) |
+| Messages | Shared strings in `backend/utils/constants.js` |
 
 ---
 
@@ -108,7 +112,7 @@ PathShala/
 │   ├── src/
 │   ├── package.json
 │   ├── tailwind.config.js
-│   └── .env                  ← REACT_APP_BASE_URL, RAZORPAY_KEY
+│   └── .env                  ← REACT_APP_BASE_URL, REACT_APP_RAZORPAY_KEY
 └── backend/                  ← Express API (port 4000)
     ├── index.js              ← app entry
     ├── config/               ← MongoDB, Cloudinary, Razorpay
@@ -129,29 +133,29 @@ frontend/src/
 ├── App.jsx                   ← all routes
 ├── index.js                  ← Redux store + BrowserRouter + Toaster
 ├── index.css / App.css
-├── pages/                    ← route-level screens
+├── pages/                    ← Home, Catalog, CourseDetails, ViewCourse, Auth, About, Contact, Dashboard
 ├── components/
-│   ├── common/               ← Navbar, Footer, Logo, RatingStars, …
-│   ├── chatbot/              ← unused OpenAI-style chatbot (no backend route)
-│   ├── ContactPage/
+│   ├── common/               ← Navbar, Footer, Logo, ReviewSlider, IconBtn
+│   ├── chatbot/              ← leftover widget (no backend chat route)
+│   ├── ContactPage/          ← older light contact form (unused on About/Contact)
 │   └── core/
 │       ├── Auth/             ← Login, Signup, PrivateRoute
 │       ├── Homepage/
 │       ├── AboutPage/
-│       ├── Catalog/
-│       ├── Course/
-│       ├── ContactUsPage/
+│       ├── Catalog/          ← Course_Card, CourseSlider
+│       ├── Course/           ← CourseDetailsCard
+│       ├── ContactUsPage/    ← dark contact form used on About + Contact
 │       ├── Dashboard/        ← student + instructor dashboards
-│       └── ViewCourse/       ← lecture player
+│       └── ViewCourse/       ← player, sidebar, review modal
 ├── slices/                   ← Redux slices
-├── reducer/index.js          ← combineReducers
+├── reducer/index.js
 ├── services/
 │   ├── apis.js               ← all endpoint URLs
-│   ├── apiconnector.js       ← axios wrapper
-│   └── operations/           ← thunks / API call functions
+│   ├── apiconnector.js
+│   └── operations/           ← API call functions
 ├── data/                     ← navbar, footer, dashboard links, homepage copy
 ├── hooks/
-├── utils/                    ← ACCOUNT_TYPE, chatbot config
+├── utils/                    ← ACCOUNT_TYPE, catalogSlug, chatbot config
 └── assets/
 ```
 
@@ -170,14 +174,14 @@ backend/
 │   ├── Course.js             → /api/v1/course
 │   ├── Payments.js           → /api/v1/payment
 │   └── Contact.js            → /api/v1/reach
-├── controllers/              ← business logic
-├── models/                   ← Mongoose schemas
-├── middlewares/auth.js       ← JWT + role guards
-├── mail/templates/           ← HTML emails
+├── controllers/
+├── models/
+├── middlewares/auth.js       ← JWT + Student / Instructor / Admin / InstructorOrAdmin
+├── mail/templates/
 └── utils/
     ├── mailSender.js
-    ├── imageUploader.js      ← Cloudinary upload (images + videos)
-    ├── constants.js          ← USER_ROLE
+    ├── imageUploader.js
+    ├── constants.js          ← USER_ROLE, ExceptionMessage, SuccessMessage
     └── secToDuration.js
 ```
 
@@ -188,10 +192,10 @@ backend/
 ```
 Browser (React, :3000)
     │  REACT_APP_BASE_URL = http://localhost:4000/api/v1
-    │  Authorization header is spelled **Authorisation** (see gotchas)
+    │  Auth header: Authorisation or Authorization (Bearer JWT)
     ▼
 Express (Node, :4000)
-    ├── /api/v1/auth      User signup, login, OTP, password
+    ├── /api/v1/auth      Signup, login, OTP, password
     ├── /api/v1/profile   Profile, avatar, enrolled courses, instructor stats
     ├── /api/v1/course    Courses, sections, lectures, categories, ratings
     ├── /api/v1/payment   Razorpay capture + verify
@@ -215,8 +219,8 @@ Defined in both apps:
 | Role | Value | Can do |
 | --- | --- | --- |
 | Student | `"Student"` | Buy courses, cart, watch lectures, rate courses |
-| Instructor | `"Instructor"` | Create/edit/publish courses, instructor dashboard |
-| Admin | `"Admin"` | Create categories |
+| Instructor | `"Instructor"` | Create/edit/publish courses, create categories, instructor dashboard |
+| Admin | `"Admin"` | Create categories (API only; no dashboard) |
 
 Signup UI only offers **Student** or **Instructor**. To create an Admin, either:
 
@@ -252,11 +256,11 @@ cd path-shala
 ```bash
 cd backend
 npm install
-cp .env.example .env   # or create backend/.env yourself (see below)
+# create backend/.env (see below)
 npm run dev            # nodemon on PORT (default 4000)
 ```
 
-Health check: open `http://localhost:4000/` — you should see `{ "success": true, "message": "Your default route is running" }`.
+Health check: open `http://localhost:4000/` — you should see `{ "success": true, "message": "PathShala Server is running" }`.
 
 ### 3. Frontend
 
@@ -269,7 +273,7 @@ npm start              # http://localhost:3000
 
 Run **backend first**, then frontend. The client talks to `REACT_APP_BASE_URL`.
 
-> `frontend/package.json` still has `"server": "cd server && npm run dev"`. That path is outdated (the API folder is now `backend/`). Start the API from `backend/` directly.
+> `frontend/package.json` still has `"server": "cd server && npm run dev"`. That path is outdated (the API folder is `backend/`). Start the API from `backend/` directly. Do not use `npm run dev` in `frontend/` unless you first fix that script.
 
 ---
 
@@ -284,6 +288,9 @@ PORT=4000
 MONGODB_URL=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/<dbname>
 
 JWT_SECRET=replace-with-a-long-random-string
+
+# Used in password-reset emails
+FRONTEND_URL=http://localhost:3000
 
 # Cloudinary
 CLOUD_NAME=
@@ -304,15 +311,21 @@ SMTP_PASS=xxxx xxxx xxxx xxxx
 
 ```env
 REACT_APP_BASE_URL=http://localhost:4000/api/v1
-
-# Used by Razorpay Checkout (see known issues: CRA only exposes REACT_APP_* vars)
-RAZORPAY_KEY=
+REACT_APP_RAZORPAY_KEY=rzp_test_xxxxxxxxxxxx
 ```
 
-For production frontend, point `REACT_APP_BASE_URL` at the deployed API, for example:
+CRA only inlines variables prefixed with `REACT_APP_`. Checkout reads `process.env.REACT_APP_RAZORPAY_KEY`.
+
+For production frontend, point the API at the deployed backend:
 
 ```env
 REACT_APP_BASE_URL=https://path-shala-backend.onrender.com/api/v1
+```
+
+On production backend, set `FRONTEND_URL` to the Vercel origin so reset emails hit the live app:
+
+```env
+FRONTEND_URL=https://path-shala-omega.vercel.app
 ```
 
 ---
@@ -336,17 +349,38 @@ Token is read from, in order:
 
 1. `req.cookies.token`
 2. `req.body.token`
-3. `req.header("Authorisation")` after stripping `Bearer `
+3. `Authorization` **or** `Authorisation` header, after stripping `Bearer `
 
-**The header name is `Authorisation` (British spelling), not `Authorization`.** The frontend matches this in most API helpers. If you add a new authenticated call, use the same spelling or the request will 401.
+The frontend still sends `Authorisation` on most calls. Both spellings work on the API.
 
 Role guards (run after `auth`):
 
 - `isStudent` — `accountType === "Student"`
 - `isInstructor` — `accountType === "Instructor"`
 - `isAdmin` — `accountType === "Admin"`
+- `isInstructorOrAdmin` — instructor **or** admin (used by `POST /course/createCategory`)
 
 JWT payload: `{ email, id, accountType }`, signed with `JWT_SECRET`, expires in **24 hours**. Login also sets an httpOnly cookie for **3 days**.
+
+API success/error copy lives in `backend/utils/constants.js` (`ExceptionMessage`, `SuccessMessage`).
+
+### Categories
+
+`POST /course/createCategory` (instructor or admin):
+
+- Trims name; description is optional (falls back to the name)
+- Rejects duplicates (case-insensitive)
+- Returns the created category so the Add Course form can select it immediately
+
+`GET /course/showAllCategories` populates **published** course IDs so the navbar can show counts.
+
+`POST /course/getCategoryPageDetails`:
+
+- Does **not** 404 when a category has no published courses
+- Returns `selectedCategory`, `differentCategory` (another category with courses if possible), and `mostSellingCourses` (top 10 by `studentsEnrolled.length`)
+- Populates instructor and `ratingAndReviews` on courses
+
+The review model is registered as `"RatingAndReview"` so those populates succeed.
 
 ### Email (`backend/utils/mailSender.js`)
 
@@ -360,15 +394,19 @@ Nodemailer over `smtp.gmail.com:465`. Templates live in `backend/mail/templates/
 | `paymentSuccessEmail.js` | Payment confirmation |
 | `contactFormRes.js` | Contact form acknowledgement |
 
-OTP documents expire after **5 minutes** (Mongo TTL on `OTP.createdAt`). Password-reset tokens also expire in **5 minutes**. The reset email currently links to the **production** frontend:
+OTP documents expire after **5 minutes** (Mongo TTL on `OTP.createdAt`). Password-reset tokens also expire in **5 minutes**. Reset emails use:
 
-`https://path-shala-omega.vercel.app/update-password/<token>`
+```
+${FRONTEND_URL}/update-password/<token>
+```
 
-For local reset testing, change that URL in `backend/controllers/ResetPassword.js`.
+`FRONTEND_URL` defaults to `http://localhost:3000` if unset.
+
+`POST /auth/sendotp` emails the OTP and **does not** return the code in the JSON body.
 
 ### File uploads
 
-`utils/imageUploader.js` uploads any file to Cloudinary with `resource_type: "auto"` (works for images and videos). Used for:
+`utils/imageUploader.js` uploads any file to Cloudinary with `resource_type: "auto"` (images and videos). Used for:
 
 - Course thumbnails (`createCourse` / `editCourse`)
 - Lecture videos (`createSubSection` / `updateSubSection`)
@@ -393,7 +431,7 @@ Redux store from `reducer/index.js`, `BrowserRouter`, `Toaster` for notification
 | `/verify-email` | OTP after signup | Public |
 | `/forgot-password` | Request reset email | Public |
 | `/update-password/:id` | Set new password | Public |
-| `/About` `/contact` | About, Contact | Public |
+| `/about` `/contact` | About, Contact | Public |
 | `/dashboard/my-profile` | Profile | Private |
 | `/dashboard/setting` | Settings | Private |
 | `/dashboard/enrolled-courses` | Student courses | Private |
@@ -407,7 +445,30 @@ Redux store from `reducer/index.js`, `BrowserRouter`, `Toaster` for notification
 
 `PrivateRoute` redirects to `/login` when Redux `auth.token` is null.
 
-Navbar links: Home, Catalog (categories from API), About Us (`/about`), Contact Us. Note About is registered as `/About` (capital A) in `App.jsx` — React Router is case-insensitive on most setups, but keep it in mind.
+Navbar: Home, Catalog (hover dropdown on desktop, tap on mobile, course counts), About Us (`/about`), Contact Us. Sticky bar with blur.
+
+Sidebar links in `data/dashboard-links.js` are filtered by `accountType`. Role gating inside `App.jsx` is still broken (see [gotchas](#known-issues-and-gotchas)); routes are registered anyway.
+
+### Public pages (UI)
+
+| Page | What you get |
+| --- | --- |
+| Home | Hero, code blocks, catalog CTA, timeline, instructor CTA, **testimonials slider**, rule-based Chat Help FAB |
+| Catalog | Breadcrumb, category pills, Most Popular / New tabs, empty/loading/error, other-category slider, frequently bought |
+| Course details | Shimmer load, accordion curriculum, author block, sticky buy/share card, ratings |
+| About | Quote, stats, learning grid, contact form, reviews |
+| Contact | Contact details + dark form, reviews |
+| Reviews | Shared `ReviewSlider`: autoplay cards, stars, arrows, loading/empty states |
+
+Catalog slugs come from `utils/catalogSlug.js` (lowercase, hyphenated). Navbar and Catalog must use the same helper.
+
+### Lecture player (`ViewCourse`)
+
+- Layout: sidebar (desktop) / stacked list (mobile) + player
+- Shimmer while `getFullCourseDetails` loads (no loading toast)
+- Sidebar: back to enrolled courses, **Add review**, progress bar, accordion by section `_id`, completed checkmarks, active lecture in yellow
+- Player: rounded 16:9 video-react player; end overlay with mark complete / rewatch / prev / next
+- Review modal: portal to `document.body`, custom star buttons, controlled textarea (Space is not stolen by the video player)
 
 ### Redux slices
 
@@ -423,30 +484,30 @@ Navbar links: Home, Catalog (categories from API), About Us (`/about`), Contact 
 
 All URLs are built in `frontend/src/services/apis.js` from `process.env.REACT_APP_BASE_URL`.
 
-Call sites:
-
 | File | Covers |
 | --- | --- |
 | `operations/authAPI.js` | OTP, signup, login, logout, reset password |
 | `operations/profileAPI.js` | User details, enrolled courses, instructor dashboard |
 | `operations/SettingsAPI.js` | Avatar, profile fields, change password, delete account |
-| `operations/courseDetailsAPI.js` | CRUD courses / sections / lectures, ratings, progress |
+| `operations/courseDetailsAPI.js` | CRUD courses / sections / lectures, **create category**, ratings, progress |
 | `operations/studentFeaturesAPI.js` | Razorpay buy + verify |
 | `operations/pageAndComponentData.js` | Catalog page payload |
+
+Most authenticated calls send `Authorisation: Bearer ${token}`.
 
 ### Add-course wizard (instructors)
 
 Redux `course.step`:
 
-1. **Course Information** — name, description, price, category, thumbnail, what you’ll learn, instructions (`CourseInformationForm`)
+1. **Course Information** — name, description, price, category, thumbnail, what you’ll learn, instructions. Dropdown includes **“Can't find a category? Add new”** → `POST /course/createCategory`.
 2. **Course builder** — sections and lectures / video upload (`CourseBuilderForm`, `NestedView`, `SubSectionModal`)
 3. **Publish** — set status Draft or Published (`PublishCourse`)
 
 ### Homepage chatbot
 
-Home (`pages/Home.jsx`) toggles `react-chatbot-kit`. Replies are **hard-coded regex rules** in `utils/ActionProvider.js` (greetings, courses, payment, login, etc.). There is **no LLM** on this path.
+Home toggles `react-chatbot-kit`. Replies are **hard-coded regex rules** in `utils/ActionProvider.js` (greetings, courses, payment, login, etc.). There is **no LLM** on this path.
 
-`components/chatbot/index.jsx` is a separate widget that POSTs to `/api/v1/chat/chat`. That route **does not exist** on the backend. Treat it as leftover.
+`components/chatbot/index.jsx` POSTs to `/api/v1/chat/chat`. That route **does not exist**. Treat it as leftover.
 
 ---
 
@@ -455,7 +516,7 @@ Home (`pages/Home.jsx`) toggles `react-chatbot-kit`. Replies are **hard-coded re
 ### Signup
 
 1. User fills Signup (Student or Instructor) → data stored in `auth.signupData`
-2. `POST /auth/sendotp` → OTP emailed, also currently returned in the JSON (dev convenience)
+2. `POST /auth/sendotp` → OTP emailed (not returned in the API body)
 3. `/verify-email` → `POST /auth/signup` with OTP
 4. Backend creates empty `Profile`, hashes password (bcrypt, 10 rounds), default avatar from [DiceBear initials](https://api.dicebear.com)
 5. Redirect to `/login`
@@ -471,12 +532,13 @@ Home (`pages/Home.jsx`) toggles `react-chatbot-kit`. Replies are **hard-coded re
 1. Student opens course → Add to cart or Buy Now
 2. `BuyCourse()` loads Razorpay Checkout script
 3. `POST /payment/capturePayment` creates a Razorpay order (amount in paise, INR)
-4. After payment, `POST /payment/verifyPayment` checks HMAC signature, enrolls the student, creates `CourseProgress`, sends enrollment email
-5. Cart is reset; user is sent to enrolled courses
+4. Checkout uses `REACT_APP_RAZORPAY_KEY`
+5. After payment, `POST /payment/verifyPayment` checks HMAC signature, enrolls the student, creates `CourseProgress`, sends enrollment email
+6. Cart is reset; user is sent to enrolled courses
 
 ### Watch a lecture
 
-1. `GET`-style `POST /course/getFullCourseDetails` (auth) loads content + completed videos
+1. Authenticated `POST /course/getFullCourseDetails` loads curriculum + completed videos
 2. Player at `view-course/:courseId/section/:sectionId/sub-section/:subSectionId`
 3. Completing a lecture → `POST /course/updateCourseProgress` (`isStudent`)
 4. Optional `POST /course/createRating` (one review per student per course)
@@ -484,7 +546,7 @@ Home (`pages/Home.jsx`) toggles `react-chatbot-kit`. Replies are **hard-coded re
 ### Forgot password
 
 1. `POST /auth/reset-password-token` with email
-2. User gets a link with a random hex token (5 min TTL)
+2. User gets a link `{FRONTEND_URL}/update-password/<token>` (5 min TTL)
 3. `POST /auth/reset-password` with `{ password, confirmPassword, token }`
 
 ---
@@ -493,10 +555,11 @@ Home (`pages/Home.jsx`) toggles `react-chatbot-kit`. Replies are **hard-coded re
 
 Base URL: `http://localhost:4000/api/v1`
 
-Protected routes need header:
+Protected routes need a Bearer token. Either header works:
 
 ```http
 Authorisation: Bearer <jwt>
+Authorization: Bearer <jwt>
 ```
 
 ### Auth — `/auth`
@@ -528,10 +591,10 @@ Authorisation: Bearer <jwt>
 | POST | `/createCourse` | Instructor | Multipart course + `thumbnailImage` |
 | POST | `/editCourse` | Instructor | Update course fields / thumbnail |
 | GET | `/getAllCourses` | No | Public list |
-| POST | `/getCourseDetails` | No | `{ courseId }` public details |
+| POST | `/getCourseDetails` | No | `{ courseId }` public details (includes ratings) |
 | POST | `/getFullCourseDetails` | Yes | Full curriculum + progress |
 | GET | `/getInstructorCourses` | Instructor | That instructor’s courses |
-| DELETE | `/deleteCourse` | — | `{ courseId }` |
+| DELETE | `/deleteCourse` | — | `{ courseId }` (no role guard today) |
 | POST | `/addSection` | Instructor | `{ courseId, sectionName }` |
 | POST | `/updateSection` | Instructor | `{ sectionId, sectionName, courseId }` |
 | POST | `/deleteSection` | Instructor | `{ sectionId, courseId }` |
@@ -539,8 +602,8 @@ Authorisation: Bearer <jwt>
 | POST | `/updateSubSection` | Instructor | Update lecture / video |
 | POST | `/deleteSubSection` | Instructor | `{ subSectionId, sectionId }` |
 | POST | `/updateCourseProgress` | Student | `{ courseId, subsectionId }` |
-| POST | `/createCategory` | Admin | `{ name, description }` |
-| GET | `/showAllCategories` | No | Navbar + forms |
+| POST | `/createCategory` | Instructor or Admin | `{ name, description? }` |
+| GET | `/showAllCategories` | No | Navbar + forms (published course counts) |
 | POST | `/getCategoryPageDetails` | No | `{ categoryId }` catalog payload |
 | POST | `/createRating` | Student | `{ courseId, rating, review }` |
 | GET | `/getAverageRating` | No | Average for a course |
@@ -595,6 +658,7 @@ CourseProgress
 
 RatingAndReview
   user, course, rating, review
+  (Mongoose model name: "RatingAndReview")
 ```
 
 ---
@@ -605,7 +669,7 @@ RatingAndReview
 | --- | --- | --- |
 | MongoDB Atlas | Persistence | `MONGODB_URL` |
 | Cloudinary | Thumbnails, avatars, lecture videos | `CLOUD_NAME`, `API_KEY`, `API_SECRET`, `FOLDER_NAME` |
-| Razorpay | Checkout | `RAZORPAY_KEY` / `RAZORPAY_SECRET` |
+| Razorpay | Checkout | `RAZORPAY_KEY` / `RAZORPAY_SECRET` (server), `REACT_APP_RAZORPAY_KEY` (client) |
 | Gmail SMTP | Transactional email | `SMTP_USER`, `SMTP_PASS` |
 | DiceBear | Default avatar on signup | Hard-coded URL in Auth controller |
 | Vercel | Frontend host | Production frontend |
@@ -619,17 +683,17 @@ RatingAndReview
 
 - Root directory: `frontend`
 - Build: `npm run build` (CRA → `build/`)
-- Env: `REACT_APP_BASE_URL` must be the **production** API including `/api/v1`
+- Env: `REACT_APP_BASE_URL` (production API **including** `/api/v1`) and `REACT_APP_RAZORPAY_KEY`
 - Rebuild after changing any `REACT_APP_*` variable (they are inlined at build time)
 
 ### Backend (Render)
 
 - Root directory: `backend`
 - Start: `npm start` (`node index.js`)
-- Set all `backend/.env` keys in the Render dashboard
+- Set all `backend/.env` keys in the Render dashboard, including `FRONTEND_URL`
 - CORS is currently `origin: "*"` so any frontend origin can call the API
 
-After deploy, confirm `GET https://<api-host>/` returns the default JSON.
+After deploy, confirm `GET https://<api-host>/` returns `{ "success": true, "message": "PathShala Server is running" }`.
 
 ---
 
@@ -640,15 +704,16 @@ After deploy, confirm `GET https://<api-host>/` returns the default JSON.
 1. Create a branch from `development` (or `main`).
 2. Run backend on `:4000` and frontend on `:3000`.
 3. Keep API URLs in `frontend/src/services/apis.js` only — do not hard-code hosts in components.
-4. New authenticated frontend calls must send `Authorisation: Bearer ${token}` (that spelling).
-5. New instructor/student/admin-only endpoints must chain `auth` + `isInstructor` / `isStudent` / `isAdmin`.
-6. After adding a category, it appears in the navbar Catalog automatically (`GET /course/showAllCategories`).
+4. New authenticated frontend calls should send `Authorisation: Bearer ${token}` (backend also accepts `Authorization`).
+5. New instructor/student/admin-only endpoints must chain `auth` + `isInstructor` / `isStudent` / `isAdmin` / `isInstructorOrAdmin`.
+6. After adding a category (from Add Course or the API), it appears in the navbar Catalog (`GET /course/showAllCategories`).
+7. Catalog links must use `toCatalogSlug(name)` so navbar and `/catalog/:catalogName` stay in sync.
 
-### Adding a course category (Admin)
+### Adding a course category
+
+Instructors can add one from **Add Course → Course Information**. Or via API (instructor or admin JWT):
 
 ```bash
-# 1. Log in as Admin, copy JWT
-# 2.
 curl -X POST http://localhost:4000/api/v1/course/createCategory \
   -H "Content-Type: application/json" \
   -H "Authorisation: Bearer YOUR_JWT" \
@@ -677,37 +742,35 @@ npm run build  # production bundle
 
 1. Backend connects to MongoDB (log: `connection to database successfully`)
 2. SMTP verifies (log: `SMTP Server is ready`) in non-production
-3. Create an Admin user and at least one Category
-4. Sign up as Instructor, create a Draft course, add a section + lecture, Publish
-5. Sign up as Student, buy (Razorpay test card), open the lecture player
+3. Sign up as Instructor (or create an Admin) and add at least one Category
+4. Create a Draft course, add a section + lecture, Publish
+5. Sign up as Student, buy (Razorpay test card), open the lecture player, leave a review
 
 ---
 
 ## Known issues and gotchas
 
-These are useful while debugging; fix them when you touch the related code.
+Useful while debugging; fix them when you touch the related code.
 
-1. **Auth header spelling** — Backend reads `Authorisation`. Most frontend files use that. A few calls in `SettingsAPI.js` and one in `courseDetailsAPI.js` use `Authorization` and can 401.
+1. **`App.jsx` role routes** — Student/instructor dashboard routes are wrapped so the `user?.accountType` check is rendered as text, not JS. There is also a typo: `accoutType` vs `accountType`. Routes still work because they are always registered; sidebar links are filtered correctly in `data/dashboard-links.js`.
 
-2. **`App.jsx` role routes** — Student/instructor dashboard routes are wrapped in a way that does not actually gate on `user.accountType`. There is also a typo: `accoutType` vs `accountType`. Routes still work because they are always registered; sidebar links are filtered correctly in `data/dashboard-links.js`.
+2. **Auth header on delete lecture** — `deleteSubSection` in `courseDetailsAPI.js` still sends `Authorization`. The backend accepts both spellings now, so this should work; prefer `Authorisation` for consistency.
 
-3. **About path** — Navbar goes to `/about`; route is declared as `/About`.
+3. **`frontend` `npm run server` / `npm run dev`** — Still `cd server`. The API folder is `backend/`.
 
-4. **Razorpay key on the client** — Checkout uses `process.env.RAZORPAY_KEY`. Create React App only exposes variables prefixed with `REACT_APP_`. Prefer `REACT_APP_RAZORPAY_KEY` and read that in `studentFeaturesAPI.js`.
+4. **Chat backend** — `components/chatbot/index.jsx` calls `/api/v1/chat/chat`, which is not implemented. The live Home chatbot is rule-based only.
 
-5. **OTP in API response** — `sendotp` returns the OTP in JSON. Fine for local debug; remove before treating this as production-hardening.
+5. **Course `tag` field** — Schema marks `tag` as required, but `createCourse` does not always set it. If course creation fails validation, check this.
 
-6. **Password reset URL** — Hard-coded to the Vercel frontend. Local reset emails will not point at `localhost:3000`.
+6. **`DELETE /course/deleteCourse`** — No `auth` / `isInstructor` middleware on the route.
 
-7. **`frontend` `npm run server` / `npm run dev`** — Still `cd server`. The API folder is `backend/`.
+7. **CORS** — `origin: "*"` with `credentials: true` is a combination browsers may reject for credentialed cookies. Login currently also stores JWT in `localStorage`, which is what the SPA uses.
 
-8. **Chat backend** — `components/chatbot/index.jsx` calls `/api/v1/chat/chat`, which is not implemented. The live Home chatbot is rule-based only.
+8. **Email template links** — Several HTML templates still hard-code `https://path-shala-omega.vercel.app/...` (including a few broken `/verify-email` dashboard links). Reset **email body** uses `FRONTEND_URL`; other templates do not.
 
-9. **Course `tag` field** — Schema marks `tag` as required, but `createCourse` does not always set it. If course creation fails validation, check this.
+9. **No Admin UI** — Admins can only create categories via API (or an instructor can create them from Add Course).
 
-10. **CORS** — `origin: "*"` with `credentials: true` is a combination browsers may reject for credentialed cookies. Login currently also stores JWT in `localStorage`, which is what the SPA uses.
-
-11. **`.env` files** — Never commit them. Rotate any keys that were ever committed or shared.
+10. **`.env` files** — Never commit them. Rotate any keys that were ever committed or shared.
 
 ---
 
