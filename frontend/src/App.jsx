@@ -19,7 +19,6 @@ import Cart from "./components/core/Dashboard/Cart/index";
 import { ACCOUNT_TYPE } from "./utils/constants";
 import { useSelector } from "react-redux";
 import AddCourse from "./components/core/Dashboard/AddCourse/index";
-
 import MyCourses from "./components/core/Dashboard/MyCourses";
 import EditCourse from "./components/core/Dashboard/EditCourse/index";
 import Catalog from "./pages/Catalog";
@@ -27,6 +26,7 @@ import CourseDetails from "./pages/CourseDetails";
 import ViewCourse from "./pages/ViewCourse";
 import VideoDetails from "./components/core/ViewCourse/VideoDetails";
 import Instructor from "./components/core/Dashboard/InstructorDashboard/Instructor";
+
 function App() {
   const { user } = useSelector((state) => state.profile);
   return (

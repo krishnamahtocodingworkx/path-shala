@@ -100,7 +100,7 @@ const ContactUsForm = () => {
         <div className="flex gap-3">
           <select
             id="countrycode"
-            className={`${fieldClass} w-[110px] shrink-0`}
+            className={`${fieldClass} w-[90px] shrink-0`}
             {...register("countrycode", { required: true })}
           >
             {CountryCode.map((ele, i) => (
