@@ -54,7 +54,7 @@ app.use("/api/v1/reach",contact)
 app.get("/",(req,res)=>{
     return res.json({
         success:true,
-        message:"PathShala Server is running"
+        message:"PathShala Server is running successfully"
     })
 })
 
