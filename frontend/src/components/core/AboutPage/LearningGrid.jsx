@@ -1,12 +1,13 @@
-import React from "react";
-import CTAButton from "../Homepage/Button";
-import HighlightText from "../Homepage/HighlightText";
+import React from "react"
+
+import CTAButton from "../Homepage/Button"
+import HighlightText from "../Homepage/HighlightText"
 
 const LearningGridArray = [
   {
     order: -1,
-    heading: "World-Class Learning for",
-    highlightText: "Anyone, Anywhere",
+    heading: "World-class learning for",
+    highlightText: "anyone, anywhere",
     description:
       "PathShala partners with more than 275+ leading universities and companies to bring flexible, affordable, job-relevant online learning to individuals and organizations worldwide.",
     BtnText: "Learn More",
@@ -14,73 +15,79 @@ const LearningGridArray = [
   },
   {
     order: 1,
-    heading: "Curriculum Based on Industry Needs",
+    heading: "Curriculum based on industry needs",
     description:
-      "Save time and money! The Belajar curriculum is made to be easier to understand and in line with industry needs.",
+      "Save time and money. Our curriculum is easier to understand and aligned with what the industry actually needs.",
   },
   {
     order: 2,
-    heading: "Our Learning Methods",
+    heading: "Our learning methods",
     description:
-      "PathShala partners with more than 275+ leading universities and companies to bring",
+      "Learn by doing with projects, quizzes, and personalized feedback from instructors around the world.",
   },
   {
     order: 3,
     heading: "Certification",
     description:
-      "PathShala partners with more than 275+ leading universities and companies to bring",
+      "Earn certificates that help you showcase your skills and stand out to employers.",
   },
   {
     order: 4,
-    heading: `Rating "Auto-grading"`,
+    heading: "Auto-grading",
     description:
-      "PathShala partners with more than 275+ leading universities and companies to bring",
+      "Get instant, useful feedback so you can improve faster with every assignment.",
   },
   {
     order: 5,
-    heading: "Ready to Work",
+    heading: "Ready to work",
     description:
-      "PathShala partners with more than 275+ leading universities and companies to bring",
+      "Build job-ready skills through practical courses designed for real-world roles.",
   },
-];
+]
 
 const LearningGrid = () => {
   return (
-    <div className="grid max-auto grid-cols-1 lg:grid-cols-4">
-      {LearningGridArray.map((card, index) => {
-        return (
-          <div
-            key={index}
-            className={`${index === 0 && "lg:col-span-2 lg:h-[250px]"}
-                ${card.order % 2 === 1 ? "bg-richblack-700" : "richblack-800"}
-                ${card.order === 3 && "lg:col-start-2"}
-
-                `}
-          >
-            {card.order < 0 ? (
-              <div className="lg:w-[90%]">
-                <div>
-                  {card.heading}
-                  <HighlightText text={card.highlightText} />
-                  <p>{card.description}</p>
-                  <div className="w-fit">
-                    <CTAButton active={true} linkto={card.BtnLink}>
-                      {card.BtnText}
-                    </CTAButton>
-                  </div>
-                </div>
+    <div className="mb-16 grid grid-cols-1 lg:grid-cols-4">
+      {LearningGridArray.map((card, index) => (
+        <div
+          key={index}
+          className={`${index === 0 && "lg:col-span-2 lg:h-[294px]"} ${
+            card.order < 0
+              ? "bg-transparent"
+              : card.order % 2 === 1
+              ? "bg-richblack-700"
+              : "bg-richblack-800"
+          } ${card.order === 3 && "lg:col-start-2"} p-8`}
+        >
+          {card.order < 0 ? (
+            <div className="flex h-full flex-col gap-5 lg:w-[90%]">
+              <h2 className="text-3xl font-semibold md:text-4xl">
+                {card.heading}
+                <HighlightText text={card.highlightText} />
+              </h2>
+              <p className="text-base font-medium text-richblack-300">
+                {card.description}
+              </p>
+              <div className="w-fit">
+                <CTAButton active={true} linkto={card.BtnLink}>
+                  {card.BtnText}
+                </CTAButton>
               </div>
-            ) : (
-              <div className="lg:h-[250px] flex flex-col gap-5 items-center justify-center">
-                <h1 className="ring-richblack-5 text-lg">{card.heading}</h1>
-                <p className="richblack-300">{card.description}</p>
-              </div>
-            )}
-          </div>
-        );
-      })}
+            </div>
+          ) : (
+            <div className="flex h-full min-h-[220px] flex-col gap-4 lg:min-h-[294px]">
+              <h3 className="text-lg font-semibold text-richblack-5">
+                {card.heading}
+              </h3>
+              <p className="text-sm leading-relaxed text-richblack-300">
+                {card.description}
+              </p>
+            </div>
+          )}
+        </div>
+      ))}
     </div>
-  );
-};
+  )
+}
 
-export default LearningGrid;
+export default LearningGrid

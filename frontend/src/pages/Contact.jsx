@@ -7,25 +7,36 @@ import ContactForm from "../components/core/ContactUsPage/ContactForm"
 
 const Contact = () => {
   return (
-    <div>
-      <div className="mx-auto mt-20 flex w-11/12 max-w-maxContent flex-col justify-between gap-10 text-white lg:flex-row">
-        {/* Contact Details */}
-        <div className="lg:w-[40%]">
+    <div className="bg-richblack-900 text-white">
+      <section className="bg-richblack-800">
+        <div className="mx-auto w-11/12 max-w-maxContent py-12 md:py-16">
+          <p className="text-sm font-medium text-yellow-50">Contact us</p>
+          <h1 className="mt-2 text-3xl font-semibold md:text-5xl">
+            We&apos;d love to hear from you
+          </h1>
+          <p className="mt-4 max-w-2xl text-base text-richblack-300 md:text-lg">
+            Questions, feedback, or partnership ideas — send us a message and
+            our team will get back to you.
+          </p>
+        </div>
+      </section>
+
+      <section className="mx-auto flex w-11/12 max-w-maxContent flex-col justify-between gap-10 py-12 lg:flex-row lg:py-16">
+        <div className="lg:w-[38%]">
           <ContactDetails />
         </div>
-
-        {/* Contact Form */}
-        <div className="lg:w-[60%]">
+        <div className="lg:w-[58%]">
           <ContactForm />
         </div>
-      </div>
-      <div className="relative mx-auto my-20 flex w-11/12 max-w-maxContent flex-col items-center justify-between gap-8 bg-richblack-900 text-white">
-        {/* Reviws from Other Learner */}
-        <h1 className="text-center text-4xl font-semibold mt-8">
+      </section>
+
+      <section className="mx-auto w-11/12 max-w-maxContent pb-16">
+        <h2 className="mb-8 text-center text-3xl font-semibold md:text-4xl">
           Reviews from other learners
-        </h1>
-      </div>
+        </h2>
         <ReviewSlider />
+      </section>
+
       <Footer />
     </div>
   )
