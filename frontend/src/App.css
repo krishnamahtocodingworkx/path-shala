@@ -9,7 +9,9 @@ body {
 }
 
 .homepage-bg {
-  background: url("../src/assets/Images/bghome.svg");
+  background: url("./assets/Images/bghome.svg");
+  background-size: cover;
+  background-position: center;
 }
 
 .input--box {

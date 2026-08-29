@@ -17,6 +17,10 @@
   }
 }
 
+.code-border {
+  background: linear-gradient(123.77deg, #8a2be2 -6.46%, #ffa500 59.04%, #f8f8ff 124.53%);
+}
+
 .shimmer {
   position: relative;
   overflow: hidden;

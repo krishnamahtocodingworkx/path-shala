@@ -1,69 +1,59 @@
-import React from 'react'
-import CTAButton from "./Button";
-import HighlightText from "./HighlightText";
-import { FaArrowRight } from "react-icons/fa6";
-import { TypeAnimation } from 'react-type-animation';
+import React from "react"
+import { FaArrowRight } from "react-icons/fa6"
+import { TypeAnimation } from "react-type-animation"
 
+import CTAButton from "./Button"
 
-
-const CodeBlocks = ({
-  heading,
-  position,
-  content1,
-  codingContent
-}) => {
+const CodeBlocks = ({ heading, position, content1, codingContent }) => {
   return (
-    <div className={`flex ${position} my-20 justify-between flex-col lg:gap-10 gap-10 
-    lg:flex-row`}>
-      {/* first section */}
-      <div className="w-[100%] lg:w-[50%] flex flex-col gap-7 font-inter font-bold ">
+    <div
+      className={`my-16 flex flex-col items-center justify-between gap-10 lg:gap-12 ${position}`}
+    >
+      <div className="flex w-full flex-col gap-6 lg:w-[50%]">
         {heading}
-        <p className="font-bold font-inter text-richblack-300">{content1}</p>
-        <div className="flex flex-row gap-9">
-
-          <CTAButton active={true} linkto={"/signup"}><div className="flex items-center gap-2">Try Yourself<FaArrowRight />
-          </div></CTAButton>
-          <CTAButton active={false} linkto={"/signup"}>Try it Yourself</CTAButton>
+        <p className="text-base font-medium leading-relaxed text-richblack-300">
+          {content1}
+        </p>
+        <div className="flex flex-col gap-4 sm:flex-row">
+          <CTAButton active={true} linkto="/signup">
+            <div className="flex items-center gap-2">
+              Try it yourself
+              <FaArrowRight />
+            </div>
+          </CTAButton>
+          <CTAButton active={false} linkto="/login">
+            Learn more
+          </CTAButton>
         </div>
-
       </div>
 
-      {/* section2 */}
-      <div className="flex flex-row gap-4 font-inter font-bold w-[100%] lg:w-[470px] ">
-        <div className="w-[10%]">
-          <p>0</p>
-          <p>1</p>
-          <p>2</p>
-          <p>3</p>
-          <p>4</p>
-          <p>5</p>
-          <p>6</p>
-          <p>7</p>
-          <p>8</p>
-          <p>9</p>
-          <p>10</p>
+      <div className="code-border relative w-full rounded-lg bg-richblack-800 p-[2px] lg:w-[470px]">
+        <div className="absolute -left-4 -top-4 h-24 w-24 rounded-full bg-blue-200 opacity-20 blur-2xl" />
+        <div className="relative overflow-hidden rounded-lg bg-[#0E1A2B] p-4 font-mono text-sm leading-6 text-richblack-50">
+          <div className="mb-3 flex gap-2">
+            <span className="h-3 w-3 rounded-full bg-pink-200" />
+            <span className="h-3 w-3 rounded-full bg-yellow-50" />
+            <span className="h-3 w-3 rounded-full bg-caribbeangreen-100" />
+          </div>
+          <div className="flex gap-4">
+            <div className="select-none text-center text-richblack-400">
+              {Array.from({ length: 11 }, (_, i) => (
+                <p key={i}>{i + 1}</p>
+              ))}
+            </div>
+            <TypeAnimation
+              sequence={[codingContent, 1200, " "]}
+              cursor={true}
+              omitDeletionAnimation={true}
+              repeat={Infinity}
+              style={{
+                whiteSpace: "pre-line",
+                display: "block",
+              }}
+            />
+          </div>
         </div>
-
-        <div className="w-[90%] flex flex-col">
-          <TypeAnimation
-
-            sequence={[codingContent, 1000, " "]}
-            // speed={20}
-            cursor={true}
-            omitDeletionAnimation={true}
-            repeat={Infinity}
-            style={{
-              whiteSpace: "pre-line",
-              display: "block",
-            }}
-
-          />
-        </div>
-
-
       </div>
-
-
     </div>
   )
 }
